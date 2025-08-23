@@ -1,0 +1,78 @@
+import java.util.ArrayList;
+
+public class BolsaTrabajos {
+    public static void main(String[] args) {
+    }
+}
+
+/**
+ * Clases de dominio
+ */
+
+enum Nivel{
+    BASICO, INTERMEDIO, AVANZADO   
+}
+
+class Competencia{
+    private String nombreCompetencia;
+    private Nivel nivelCompetencia;
+    
+    //Constructor
+    public Competencia(String nombreCompetencia, Nivel nivelCompetencia){
+        this.nombreCompetencia = nombreCompetencia;
+        this.nivelCompetencia = nivelCompetencia;
+    }
+    
+    //Getter y setter
+    public String getNombreCompetencia() { return nombreCompetencia; }
+    public Nivel getNivelCompetencia() { return nivelCompetencia; }
+    
+    public void setNombreCompetencia(String nombreCompetencia){
+        this.nombreCompetencia = nombreCompetencia; 
+    }
+    public void setNivelCompetencia(Nivel nivelCompetencia){
+        this.nivelCompetencia = nivelCompetencia; 
+    }    
+
+}
+
+class Postulante{
+    private String rutPostulante;
+    private String nombrePostulante;
+    private String ciudad;
+    private int numeroContacto;
+    private ArrayList<Competencia> competencias;
+    
+    //Constructor
+    public Postulante(String rutPostulante, String nombrePostulante, String ciudad, int numeroContacto){
+        this.rutPostulante = rutPostulante;
+        this.nombrePostulante = nombrePostulante;
+        this.ciudad = ciudad;
+        this.numeroContacto = numeroContacto;
+        competencias = new ArrayList<Competencia>();        
+    }
+    
+    //Getter y setter
+    
+    
+}
+
+class Puesto{
+    private String idPuesto;
+    private String titulo;
+    private String empresa;
+    private String ciudadPuesto;
+    private ArrayList<Competencia> requisitos;
+    
+    //Constructor
+    public Puesto(String idPuesto, String titulo, String empresa, String ciudadPuesto){
+        this.idPuesto = idPuesto;
+        this.titulo = titulo;
+        this.empresa = empresa;
+        this.ciudadPuesto = ciudadPuesto;
+        requisitos = new ArrayList<Competencia>();
+    }
+    
+    //Getter y setter
+
+}
