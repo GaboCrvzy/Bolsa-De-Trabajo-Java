@@ -2,12 +2,34 @@ import java.util.ArrayList;
 
 public class BolsaTrabajos {
     public static void main(String[] args) {
+        Competencia javaAvanzado = new Competencia("Java",Nivel.AVANZADO);
+        Competencia sqlIntermedio = new Competencia ("SQL", Nivel.INTERMEDIO);
+        Competencia javaBasico = new Competencia ("Java", Nivel.BASICO);
+        
+        Postulante postulanteUno = new Postulante ("217104491", "Gabriel Fuentes", "Valparaiso", "949033564");
+        Postulante postulanteDos = new Postulante ("214486320", "Alexis Escobar", "Santiago", "976321235");
+        
+        Puesto puestoDisponibleUno = new Puesto ("1234", "PROGRAMADOR", "BANCO DE CHILE", "Viña del Mar");
+        
+        postulanteUno.getCompetencias().add(javaAvanzado);
+        postulanteUno.getCompetencias().add(sqlIntermedio);
+        
+        postulanteDos.getCompetencias().add(sqlIntermedio);
+        postulanteDos.getCompetencias().add(javaBasico);
+        
+        puestoDisponibleUno.getRequisitos().add(new Competencia("Java", Nivel.INTERMEDIO));
+        puestoDisponibleUno.getRequisitos().add(new Competencia("SQL", Nivel.INTERMEDIO));
+        
+        System.out.println(postulanteUno);
+        System.out.println(postulanteDos);
+        
+        System.out.println(puestoDisponibleUno);
+        
+
+        
+        
     }
 }
-
-/**
- * Clases de dominio
- */
 
 enum Nivel{
     BASICO, INTERMEDIO, AVANZADO   
@@ -32,28 +54,51 @@ class Competencia{
     }
     public void setNivelCompetencia(Nivel nivelCompetencia){
         this.nivelCompetencia = nivelCompetencia; 
-    }    
+    } 
+    
+    @Override
+    public String toString() {return nombreCompetencia + " (" + nivelCompetencia + ")";
+}
+
 
 }
 
 class Postulante{
     private String rutPostulante;
     private String nombrePostulante;
-    private String ciudad;
-    private int numeroContacto;
+    private String ciudadPostulante;
+    private String numeroContacto;
     private ArrayList<Competencia> competencias;
     
     //Constructor
-    public Postulante(String rutPostulante, String nombrePostulante, String ciudad, int numeroContacto){
+    public Postulante(String rutPostulante, String nombrePostulante, String ciudadPostulante, String numeroContacto){
         this.rutPostulante = rutPostulante;
         this.nombrePostulante = nombrePostulante;
-        this.ciudad = ciudad;
+        this.ciudadPostulante = ciudadPostulante;
         this.numeroContacto = numeroContacto;
         competencias = new ArrayList<Competencia>();        
     }
     
     //Getter y setter
+    public String getRutPostulante(){return rutPostulante;}
+    public String getNombrePostulante(){return nombrePostulante;}
+    public String getCiudadPostulante(){return ciudadPostulante;}
+    public String getNumeroContacto(){return numeroContacto;}
+    public ArrayList<Competencia> getCompetencias(){ return competencias;}
     
+    public void setRutPostulante(String rutPostulante){this.rutPostulante = rutPostulante;}
+    public void setNombrePostulante(String nombrePostulante){this.nombrePostulante = nombrePostulante;}
+    public void setCiudadPostulante(String ciudadPostulante){this.ciudadPostulante = ciudadPostulante;}
+    public void setNumeroContacto(String numeroContacto){this.numeroContacto = numeroContacto;}
+    
+    @Override
+    public String toString() 
+    {
+        return "Postulante: " + nombrePostulante + " [" + rutPostulante + "]\n" +
+           "Ciudad: " + ciudadPostulante + "\n" +
+           "Contacto: " + numeroContacto + "\n" +
+           "Competencias: " + competencias + "\n";
+    }  
     
 }
 
@@ -74,5 +119,23 @@ class Puesto{
     }
     
     //Getter y setter
-
+    public String getIdPuesto(){return idPuesto;}
+    public String getTitulo(){return titulo;}
+    public String getEmpresa(){return empresa;}
+    public String getCiudadPuesto(){return ciudadPuesto;}
+    public ArrayList<Competencia> getRequisitos(){return requisitos;}
+            
+    public void setIdPuesto(String idPuesto){this.idPuesto = idPuesto;}
+    public void setTitulo(String titulo){this.titulo = titulo;}
+    public void setEmpresa(String empresa){this.empresa = empresa;}
+    public void setCiudadPuesto(String ciudadPuesto){this.ciudadPuesto = ciudadPuesto;}
+    
+    @Override
+    public String toString() 
+    {
+        return "Puesto: " + titulo + " en " + empresa + "\n" +
+           "Ciudad: " + ciudadPuesto + "\n" +
+           "Requisitos: " + requisitos + "\n";
+    }
+    
 }
