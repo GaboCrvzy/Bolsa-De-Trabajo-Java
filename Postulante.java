@@ -1,42 +1,55 @@
-
 package bolsatrabajos;
 
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Postulante {
-    private String rutPostulante;
-    private String nombrePostulante;
-    private String ciudadPostulante;
-    private String numeroContacto;
-    private final ArrayList<Competencia> habilidades;
+    private String rut;
+    private String nombre;
+    private String ciudad;
+    private String contacto;
+    private final Map<String, Nivel> competencias; // tercera colección
 
-    // Constructor
-    public Postulante(String rutPostulante, String nombrePostulante, String ciudadPostulante, String numeroContacto) {
-        this.rutPostulante = rutPostulante;
-        this.nombrePostulante = nombrePostulante;
-        this.ciudadPostulante = ciudadPostulante;
-        this.numeroContacto = numeroContacto;
-        this.habilidades = new ArrayList<>();
+    public Postulante(String rut, String nombre, String ciudad, String contacto) {
+        this.rut = rut;
+        this.nombre = nombre;
+        this.ciudad = ciudad;
+        this.contacto = contacto;
+        this.competencias = new HashMap<>();
     }
 
-    // Getters y Setters
-    public String getRutPostulante() { return rutPostulante; }
-    public String getNombrePostulante() { return nombrePostulante; }
-    public String getCiudadPostulante() { return ciudadPostulante; }
-    public String getNumeroContacto() { return numeroContacto; }
-    public ArrayList<Competencia> getCompetencias() { return habilidades; }
-    
+    // getters / setters básicos
+    public String getRut() { return rut; }
+    public void setRut(String rut) { this.rut = rut; }
 
-    public void setRutPostulante(String rutPostulante) { this.rutPostulante = rutPostulante; }
-    public void setNombrePostulante(String nombrePostulante) { this.nombrePostulante = nombrePostulante; }
-    public void setCiudadPostulante(String ciudadPostulante) { this.ciudadPostulante = ciudadPostulante; }
-    public void setNumeroContacto(String numeroContacto) { this.numeroContacto = numeroContacto; }
+    public String getNombre() { return nombre; }
+    public void setNombre(String nombre) { this.nombre = nombre; }
+
+    public String getCiudad() { return ciudad; }
+    public void setCiudad(String ciudad) { this.ciudad = ciudad; }
+
+    public String getContacto() { return contacto; }
+    public void setContacto(String contacto) { this.contacto = contacto; }
+
+    public void agregarCompetencia(String nombreCompetencia, Nivel nivel) {
+        if (nombreCompetencia == null || nivel == null) return;
+        competencias.put(nombreCompetencia.toLowerCase(), nivel);
+    }
+
+    public Nivel obtenerNivelCompetencia(String nombreCompetencia) {
+        if (nombreCompetencia == null) return null;
+        return competencias.get(nombreCompetencia.toLowerCase());
+    }
+
+    public boolean tieneCompetenciaConNivelMinimo(String nombreCompetencia, Nivel nivelMinimo) {
+        Nivel n = obtenerNivelCompetencia(nombreCompetencia);
+        if (n == null) return false;
+        if (nivelMinimo == null) return true;
+        return n.esMayorOIgual(nivelMinimo);
+    }
 
     @Override
     public String toString() {
-        return "\n" + "Postulante: " + nombrePostulante + " [" + rutPostulante + "]\n" +
-                "Ciudad: " + ciudadPostulante + "\n" +
-                "Contacto: " + numeroContacto + "\n" +
-                "Habilidades: " + habilidades + "\n";
+        return nombre + " [" + rut + "] " + competencias;
     }
 }
