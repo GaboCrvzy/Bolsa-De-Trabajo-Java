@@ -1,30 +1,23 @@
-
 package bolsatrabajos;
 
 public class Competencia {
-    private String nombreCompetencia;
-    private Nivel nivelCompetencia;
-    
-    // Constructor
-    public Competencia(String nombreCompetencia, Nivel nivelCompetencia){
-        this.nombreCompetencia = nombreCompetencia;
-        this.nivelCompetencia = nivelCompetencia;
+    private String nombre;
+    private Nivel nivel;
+
+    public Competencia(String nombre, Nivel nivel) {
+        this.nombre = nombre;
+        this.nivel = nivel;
     }
 
-    // Getters y Setters
-    public String getNombreCompetencia() { return nombreCompetencia; }
-    public Nivel getNivelCompetencia() { return nivelCompetencia; }
-
-    public void setNombreCompetencia(String nombreCompetencia) {
-        this.nombreCompetencia = nombreCompetencia;
+    public String getNombre() {
+        return nombre;
     }
 
-    public void setNivelCompetencia(Nivel nivelCompetencia) {
-        this.nivelCompetencia = nivelCompetencia;
+    public Nivel getNivel() {
+        return nivel;
     }
 
-    @Override
-    public String toString() {
-        return nombreCompetencia + " (" + nivelCompetencia + ")";
+    public boolean cumpleConNivel(Nivel nivelMinimo) {
+        return nivel.esMayorOIgual(nivelMinimo);
     }
 }
