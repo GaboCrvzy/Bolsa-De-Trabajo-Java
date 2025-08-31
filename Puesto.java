@@ -29,6 +29,7 @@ public class Puesto {
     public ArrayList<Postulante> getPostulantes() { return postulantes; }
     
     public void setId(String id) {this.id = id;}
+    public void setId(int id) { this.id = String.valueOf(id); } //Sobrecarga
     public void setTitulo(String titulo) {this.titulo = titulo;}
     public void setEmpresa(String empresa) {this.empresa = empresa;}
     public void setCiudad(String ciudad) {this.ciudad = ciudad;}
@@ -71,5 +72,3 @@ public class Puesto {
         return sb.toString();
     }
 }
-
-
