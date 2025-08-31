@@ -10,26 +10,23 @@ public class BolsaTrabajos {
         ArrayList<Puesto> puestos = new ArrayList<>();
 
         // Datos iniciales
-        Competencia[] reqs = {
-            new Competencia("Java", Nivel.INTERMEDIO),
-            new Competencia("SQL", Nivel.INTERMEDIO)
-        };
+        Competencia[] reqs = {new Competencia("Java", Nivel.INTERMEDIO), new Competencia("SQL", Nivel.INTERMEDIO)};
         Puesto puestoInicial = new Puesto("1234", "PROGRAMADOR", "BANCO DE CHILE", "Viña del Mar", reqs);
 
-        Postulante g = new Postulante("217104491", "Gabriel Fuentes", "Valparaiso", "949033564");
-        g.agregarCompetencia("Java", Nivel.AVANZADO);
-        g.agregarCompetencia("SQL", Nivel.INTERMEDIO);
+        Postulante postulanteUno= new Postulante("266666666", "Juanito Hernandez", "Valparaiso", "949033564");
+        postulanteUno.agregarCompetencia("Java", Nivel.AVANZADO);
+        postulanteUno.agregarCompetencia("SQL", Nivel.INTERMEDIO);
 
-        Postulante a = new Postulante("214486320", "Alexis Escobar", "Santiago", "976321235");
-        a.agregarCompetencia("Java", Nivel.BASICO);
-        a.agregarCompetencia("SQL", Nivel.INTERMEDIO);
+        Postulante postulanteDos = new Postulante("214486320", "Alexis Escobar", "Santiago", "976321235");
+        postulanteDos.agregarCompetencia("Java", Nivel.BASICO);
+        postulanteDos.agregarCompetencia("SQL", Nivel.INTERMEDIO);
 
-        puestoInicial.agregarPostulante(g);
-        puestoInicial.agregarPostulante(a);
+        puestoInicial.agregarPostulante(postulanteUno);
+        puestoInicial.agregarPostulante(postulanteDos);
         puestos.add(puestoInicial);
 
-        // BufferedReader para entrada por consola
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(System.in))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(System.in)))
+        {
             boolean running = true;
 
             while (running) {
@@ -38,13 +35,12 @@ public class BolsaTrabajos {
                 System.out.println("2. Agregar postulante a un puesto existente");
                 System.out.println("3. Mostrar puestos y postulantes seleccionados");
                 System.out.println("4. Ver información de un postulante");
-                System.out.println("5. Eliminar postulante de un puesto");
-                System.out.println("6. Eliminar requisito de un puesto");
-                System.out.println("7. Salir");
+                System.out.println("5. Eliminar requisito de un puesto");
+                System.out.println("6. Salir");
                 System.out.print("Opción: ");
 
                 String linea = br.readLine();
-                if (linea == null) break; // EOF
+                if (linea == null) break; 
                 int opcion;
                 try {
                     opcion = Integer.parseInt(linea.trim());
@@ -74,7 +70,7 @@ public class BolsaTrabajos {
                             if (idExiste) {
                                 System.out.println("El ID ya existe. Ingrese uno diferente.");
                             } else {
-                                break; // válido
+                                break; 
                             }
                         }
                         String newTitulo;
@@ -113,7 +109,7 @@ public class BolsaTrabajos {
                             String nReqLine = br.readLine();
                             if (nReqLine != null && nReqLine.matches("\\d+")) {
                                 nReq = Integer.parseInt(nReqLine.trim());
-                                break; // válido
+                                break; 
                             } else {
                                 System.out.println("Debe ingresar un número entero válido.");
                             }
@@ -138,7 +134,7 @@ public class BolsaTrabajos {
                                 if (nivelTxt == null) nivelTxt = "";
                                 try {
                                     nivelReq = Nivel.valueOf(nivelTxt.trim().toUpperCase());
-                                    break; // válido
+                                    break; 
                                 } catch (Exception ex) {
                                     System.out.println("Nivel inválido. Intente de nuevo.");
                                 }
@@ -151,7 +147,6 @@ public class BolsaTrabajos {
                         break;
 
                     case 2:
-                        // Agregar postulante a puesto
                         if (puestos.isEmpty()) {
                             System.out.println("No hay puestos disponibles. Agrega uno primero.");
                             break;
@@ -179,7 +174,7 @@ public class BolsaTrabajos {
                             System.out.print("RUT (solo números): ");
                             rut = br.readLine();
                             if (rut != null && rut.matches("\\d+")) {
-                                break; // válido
+                                break; 
                             } else {
                                 System.out.println("El RUT debe ser numérico.");
                             }
@@ -189,7 +184,7 @@ public class BolsaTrabajos {
                             System.out.print("Nombre: ");
                             nombre = br.readLine();
                             if (nombre != null && !nombre.trim().isEmpty() && !nombre.matches("\\d+")) {
-                                break; // válido
+                                break;
                             } else {
                                 System.out.println("El nombre no puede estar vacío ni ser solo números.");
                             }
@@ -199,7 +194,7 @@ public class BolsaTrabajos {
                             System.out.print("Ciudad: ");
                             ciudad = br.readLine();
                             if (ciudad != null && !ciudad.trim().isEmpty() && !ciudad.matches("\\d+")) {
-                                break; // válido
+                                break;
                             } else {
                                 System.out.println("La ciudad no puede estar vacía ni ser solo números.");
                             }
@@ -209,7 +204,7 @@ public class BolsaTrabajos {
                             System.out.print("Contacto (solo números, 8-9 dígitos): ");
                             contacto = br.readLine();
                             if (contacto != null && contacto.matches("\\d{8,9}")) {
-                                break; // Válido
+                                break;
                             } else {
                                 System.out.println("El contacto debe ser numérico de 8 o 9 dígitos.");
                             }
@@ -223,7 +218,7 @@ public class BolsaTrabajos {
                             String nLine = br.readLine();
                             if (nLine != null && nLine.matches("\\d+") && Integer.parseInt(nLine) > 0) {
                                 n = Integer.parseInt(nLine.trim());
-                                break; // válido
+                                break; 
                             } else {
                                 System.out.println("Debe ingresar un número entero válido."); 
                             }
@@ -282,41 +277,17 @@ public class BolsaTrabajos {
                                     System.out.println("Postulante encontrado en puesto: " + p.getTitulo());
                                     System.out.println(pos);
                                     encontradoPostulante = true;
-                                    break; // opcional: solo primera coincidencia
+                                    break;
                                 }
                             }
-                            if (encontradoPostulante) break; // salir del bucle de puestos si ya lo encontramos
+                            if (encontradoPostulante) break;
                         }
                         if (!encontradoPostulante) {
                             System.out.println("No se encontró un postulante con ese RUT.");
                         }
                         break;
-
-                    case 5: // Eliminar postulante
-                        System.out.print("Ingrese ID del puesto: ");
-                        String idPuesto = br.readLine();
-                        Puesto puesto = null;
-                        for (Puesto p : puestos) {
-                            if (p.getId().equals(idPuesto)) {
-                                puesto = p;
-                                break;
-                            }
-                        }
-                        if (puesto == null) {
-                            System.out.println("Puesto no encontrado.");
-                            break;
-                        }
-                        System.out.print("Ingrese RUT del postulante a eliminar: ");
-                        String rutEliminar = br.readLine();
-                        boolean eliminado = puesto.getPostulantes().removeIf(ps -> ps.getRut().equals(rutEliminar));
-                        if (eliminado) {
-                            System.out.println("Postulante eliminado correctamente.");
-                        } else {
-                            System.out.println("No existe un postulante con ese RUT en este puesto.");
-                        }
-                        break;
-
-                    case 6: // Eliminar requisito de un puesto
+                        
+                    case 5: // Eliminar requisito de un puesto
                         System.out.print("Ingrese ID del puesto: ");
                         String idReq = br.readLine();
                         Puesto puestoReq = null;
@@ -358,7 +329,7 @@ public class BolsaTrabajos {
                         }
                         break;
 
-                    case 7:
+                    case 6:
                         System.out.println("Saliendo...");
                         running = false;
                         break;
@@ -374,4 +345,3 @@ public class BolsaTrabajos {
         System.out.println("Programa finalizado.");
     }
 }
-
