@@ -7,49 +7,62 @@ public class Postulante {
     private String rut;
     private String nombre;
     private String ciudad;
-    private String contacto;
-    private final Map<String, Nivel> competencias; // tercera colección
+    private String numeroContacto;
+    private Map<String, Nivel> competencias;
 
-    public Postulante(String rut, String nombre, String ciudad, String contacto) {
+    public Postulante(String rut, String nombre, String ciudad, String numeroContacto) {
         this.rut = rut;
         this.nombre = nombre;
         this.ciudad = ciudad;
-        this.contacto = contacto;
+        this.numeroContacto = numeroContacto;
         this.competencias = new HashMap<>();
     }
 
-    // getters / setters básicos
+    // Sobrecarga para que funcione como en tu main
+    public void agregarCompetencia(String nombre, Nivel nivel) {
+        competencias.put(nombre, nivel);
+    }
+
+    public void agregarCompetencia(Competencia c) {
+        if (c != null) {
+            competencias.put(c.getNombreCompetencia(), c.getNivelCompetencia());
+        }
+    }
+    
+    public boolean tieneCompetenciaConNivelMinimo(String nombre, Nivel nivelRequerido) {
+    Nivel nivelPostulante = competencias.get(nombre);
+
+    if (nivelPostulante == null) {
+        return false; // No tiene esa competencia
+    }
+    return nivelPostulante.esMayorOIgual(nivelRequerido);
+}
+
+
+    public void eliminarCompetencia(String nombreComp) {
+        competencias.remove(nombreComp);
+    }
+
+    public Nivel buscarCompetencia(String nombreComp) {
+        return competencias.get(nombreComp);
+    }
+
+    public void mostrarCompetencias() {
+        System.out.println("Competencias de " + nombre + ": " + competencias);
+    }
+
     public String getRut() { return rut; }
-    public void setRut(String rut) { this.rut = rut; }
-
     public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
-
     public String getCiudad() { return ciudad; }
-    public void setCiudad(String ciudad) { this.ciudad = ciudad; }
-
-    public String getContacto() { return contacto; }
-    public void setContacto(String contacto) { this.contacto = contacto; }
-
-    public void agregarCompetencia(String nombreCompetencia, Nivel nivel) {
-        if (nombreCompetencia == null || nivel == null) return;
-        competencias.put(nombreCompetencia.toLowerCase(), nivel);
-    }
-
-    public Nivel obtenerNivelCompetencia(String nombreCompetencia) {
-        if (nombreCompetencia == null) return null;
-        return competencias.get(nombreCompetencia.toLowerCase());
-    }
-
-    public boolean tieneCompetenciaConNivelMinimo(String nombreCompetencia, Nivel nivelMinimo) {
-        Nivel n = obtenerNivelCompetencia(nombreCompetencia);
-        if (n == null) return false;
-        if (nivelMinimo == null) return true;
-        return n.esMayorOIgual(nivelMinimo);
-    }
+    public String getNumeroContacto() { return numeroContacto; }
+    public Map<String, Nivel> getCompetencias() { return competencias; }
 
     @Override
     public String toString() {
-        return nombre + " [" + rut + "] " + competencias;
+        return "Postulante: " + nombre + " [" + rut + "]\n" +
+               "Ciudad: " + ciudad + "\n" +
+               "Contacto: " + numeroContacto + "\n" +
+               "Competencias: " + competencias + "\n";
     }
 }
+
