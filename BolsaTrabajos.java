@@ -9,9 +9,12 @@ public class BolsaTrabajos {
     public static void main(String[] args) {
         ArrayList<Puesto> puestos = new ArrayList<>();
 
-        // Datos iniciales (SIA1.4)
-        String[] reqs = { "Java:INTERMEDIO", "SQL:INTERMEDIO" };
-        Puesto puestoInicial = new Puesto("1234", "PROGRAMADOR", "BANCO DE CHILE", "Viña del Mar",reqs);
+        // Datos iniciales
+        Competencia[] reqs = {
+            new Competencia("Java", Nivel.INTERMEDIO),
+            new Competencia("SQL", Nivel.INTERMEDIO)
+        };
+        Puesto puestoInicial = new Puesto("1234", "PROGRAMADOR", "BANCO DE CHILE", "Viña del Mar", reqs);
 
         Postulante g = new Postulante("217104491", "Gabriel Fuentes", "Valparaiso", "949033564");
         g.agregarCompetencia("Java", Nivel.AVANZADO);
@@ -34,7 +37,10 @@ public class BolsaTrabajos {
                 System.out.println("1. Agregar un nuevo puesto y sus requisitos");
                 System.out.println("2. Agregar postulante a un puesto existente");
                 System.out.println("3. Mostrar puestos y postulantes seleccionados");
-                System.out.println("4. Salir");
+                System.out.println("4. Ver información de un postulante");
+                System.out.println("5. Eliminar postulante de un puesto");
+                System.out.println("6. Eliminar requisito de un puesto");
+                System.out.println("7. Salir");
                 System.out.print("Opción: ");
 
                 String linea = br.readLine();
@@ -43,18 +49,19 @@ public class BolsaTrabajos {
                 try {
                     opcion = Integer.parseInt(linea.trim());
                 } catch (NumberFormatException e) {
-                    System.out.println("Entrada no válida. Ingrese un número (1-4).");
+                    System.out.println("Entrada no válida. Ingrese un número (1-7).");
                     continue;
                 }
 
                 switch (opcion) {
-                    case 1:// Crear nuevo puesto con validaciones
+                    case 1:
+                        // Crear nuevo puesto con validaciones
                         String newId;
                         while (true) {
                             System.out.print("ID del puesto: ");
                             newId = br.readLine();
-                            if (newId == null || newId.trim().isEmpty() || !newId.matches("\\d+")){
-                                System.out.println("El ID no puede estar vacío.");
+                            if (newId == null || newId.trim().isEmpty() || !newId.matches("\\d+")) {
+                                System.out.println("El ID no puede estar vacío ni ser no numérico.");
                                 continue;
                             }
                             boolean idExiste = false;
@@ -111,7 +118,7 @@ public class BolsaTrabajos {
                                 System.out.println("Debe ingresar un número entero válido.");
                             }
                         }
-                        String[] requisitos = new String[nReq];
+                        Competencia[] requisitos = new Competencia[nReq];
                         for (int i = 0; i < nReq; i++) {
                             String nomReq;
                             while (true) {
@@ -124,18 +131,19 @@ public class BolsaTrabajos {
                                 }
                             }
                             String nivelTxt;
+                            Nivel nivelReq;
                             while (true) {
                                 System.out.print("Nivel (BASICO, INTERMEDIO, AVANZADO) para '" + nomReq + "': ");
                                 nivelTxt = br.readLine();
                                 if (nivelTxt == null) nivelTxt = "";
                                 try {
-                                    Nivel.valueOf(nivelTxt.trim().toUpperCase());
+                                    nivelReq = Nivel.valueOf(nivelTxt.trim().toUpperCase());
                                     break; // válido
                                 } catch (Exception ex) {
                                     System.out.println("Nivel inválido. Intente de nuevo.");
                                 }
                             }
-                            requisitos[i] = nomReq.trim() + ":" + nivelTxt.trim().toUpperCase();
+                            requisitos[i] = new Competencia(nomReq.trim(), nivelReq);
                         }
                         Puesto nuevoPuesto = new Puesto(newId.trim(), newTitulo.trim(), newEmpresa.trim(), newCiudad.trim(), requisitos);
                         puestos.add(nuevoPuesto);
@@ -143,7 +151,7 @@ public class BolsaTrabajos {
                         break;
 
                     case 2:
-                        // Agregar postulante a puesto (listar puestos disponibles)
+                        // Agregar postulante a puesto
                         if (puestos.isEmpty()) {
                             System.out.println("No hay puestos disponibles. Agrega uno primero.");
                             break;
@@ -156,7 +164,10 @@ public class BolsaTrabajos {
                         String idBuscar = br.readLine();
                         Puesto encontrado = null;
                         for (Puesto p : puestos) {
-                            if (p.getId().equals(idBuscar)) { encontrado = p; break; }
+                            if (p.getId().equals(idBuscar)) { 
+                                encontrado = p; 
+                                break; 
+                            }
                         }
                         if (encontrado == null) {
                             System.out.println("Puesto no encontrado.");
@@ -195,12 +206,12 @@ public class BolsaTrabajos {
                         }
                         String contacto;
                         while (true) {
-                            System.out.print("Contacto (solo números): ");
+                            System.out.print("Contacto (solo números, 8-9 dígitos): ");
                             contacto = br.readLine();
                             if (contacto != null && contacto.matches("\\d{8,9}")) {
-                                break; // Valido
+                                break; // Válido
                             } else {
-                                System.out.println("El contacto debe ser numérico.");
+                                System.out.println("El contacto debe ser numérico de 8 o 9 dígitos.");
                             }
                         }
 
@@ -218,13 +229,12 @@ public class BolsaTrabajos {
                             }
                         }
 
-
                         for (int i = 0; i < n; i++) {
                             String nomComp;
                             while (true) {
                                 System.out.print("Nombre competencia: ");
                                 nomComp = br.readLine();
-                                if (nomComp != null && !nomComp.trim().isEmpty() && !nomComp.matches("\\d+") && nomComp.matches("^[a-zA-Z0-9 ]+$")) {
+                                if (nomComp != null && !nomComp.trim().isEmpty() && !nomComp.matches("\\d+")) {
                                     break; // válido
                                 } else {
                                     System.out.println("El nombre de la competencia no puede estar vacío ni ser solo números.");
@@ -239,6 +249,9 @@ public class BolsaTrabajos {
                                 System.out.println("Nivel inválido. Se omitió esa competencia.");
                             }
                         }
+                        encontrado.agregarPostulante(nuevo);
+                        System.out.println("Postulante agregado al puesto " + encontrado.getTitulo());
+                        break;
 
                     case 3:
                         // Mostrar puestos y postulantes seleccionados
@@ -256,7 +269,96 @@ public class BolsaTrabajos {
                         }
                         break;
 
-                    case 4:
+                    case 4: // Ver info de un postulante
+                        System.out.print("Ingrese RUT del postulante a buscar: ");
+                        String rutBuscar = br.readLine();
+                        boolean encontradoPostulante = false; 
+                        for (Puesto p : puestos) 
+                        {
+                            for (Postulante pos : p.getPostulantes())
+                            {
+                                if (pos.getRut().equals(rutBuscar))
+                                {
+                                    System.out.println("Postulante encontrado en puesto: " + p.getTitulo());
+                                    System.out.println(pos);
+                                    encontradoPostulante = true;
+                                    break; // opcional: solo primera coincidencia
+                                }
+                            }
+                            if (encontradoPostulante) break; // salir del bucle de puestos si ya lo encontramos
+                        }
+                        if (!encontradoPostulante) {
+                            System.out.println("No se encontró un postulante con ese RUT.");
+                        }
+                        break;
+
+                    case 5: // Eliminar postulante
+                        System.out.print("Ingrese ID del puesto: ");
+                        String idPuesto = br.readLine();
+                        Puesto puesto = null;
+                        for (Puesto p : puestos) {
+                            if (p.getId().equals(idPuesto)) {
+                                puesto = p;
+                                break;
+                            }
+                        }
+                        if (puesto == null) {
+                            System.out.println("Puesto no encontrado.");
+                            break;
+                        }
+                        System.out.print("Ingrese RUT del postulante a eliminar: ");
+                        String rutEliminar = br.readLine();
+                        boolean eliminado = puesto.getPostulantes().removeIf(ps -> ps.getRut().equals(rutEliminar));
+                        if (eliminado) {
+                            System.out.println("Postulante eliminado correctamente.");
+                        } else {
+                            System.out.println("No existe un postulante con ese RUT en este puesto.");
+                        }
+                        break;
+
+                    case 6: // Eliminar requisito de un puesto
+                        System.out.print("Ingrese ID del puesto: ");
+                        String idReq = br.readLine();
+                        Puesto puestoReq = null;
+                        for (Puesto p : puestos) {
+                            if (p.getId().equals(idReq)) {
+                                puestoReq = p;
+                                break;
+                            }
+                        }
+                        if (puestoReq == null) {
+                            System.out.println("Puesto no encontrado.");
+                            break;
+                        }
+                        Competencia[] reqsPuesto  = puestoReq.getRequisitos();
+                        if (reqsPuesto .length == 0) {
+                            System.out.println("El puesto no tiene requisitos.");
+                            break;
+                        }
+                        System.out.println("Requisitos actuales:");
+                        for (int i = 0; i < reqsPuesto .length; i++) {
+                            System.out.println((i + 1) + ". " + reqsPuesto [i]);
+                        }
+                        System.out.print("Ingrese número del requisito a eliminar: ");
+                        String num = br.readLine();
+                        if (num.matches("\\d+")) {
+                            int idx = Integer.parseInt(num) - 1;
+                            if (idx >= 0 && idx < reqsPuesto .length) {
+                                ArrayList<Competencia> listaReq = new ArrayList<>();
+                                for (int i = 0; i < reqsPuesto .length; i++) {
+                                    if (i != idx) listaReq.add(reqsPuesto [i]);
+                                }
+                                puestoReq.setRequisitos(listaReq.toArray(new Competencia[0]));
+                                System.out.println("Requisito eliminado.");
+                            } else {
+                                System.out.println("Número fuera de rango.");
+                            }
+                        } else {
+                            System.out.println("Entrada inválida.");
+                        }
+                        break;
+
+                    case 7:
                         System.out.println("Saliendo...");
                         running = false;
                         break;
