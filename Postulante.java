@@ -17,45 +17,41 @@ public class Postulante {
         this.numeroContacto = numeroContacto;
         this.competencias = new HashMap<>();
     }
-
-    // Sobrecarga para que funcione como en tu main
-    public void agregarCompetencia(String nombre, Nivel nivel) {
-        competencias.put(nombre, nivel);
-    }
-
-    public void agregarCompetencia(Competencia c) {
-        if (c != null) {
-            competencias.put(c.getNombreCompetencia(), c.getNivelCompetencia());
-        }
-    }
     
-    public boolean tieneCompetenciaConNivelMinimo(String nombre, Nivel nivelRequerido) {
-    Nivel nivelPostulante = competencias.get(nombre);
-
-    if (nivelPostulante == null) {
-        return false; // No tiene esa competencia
-    }
-    return nivelPostulante.esMayorOIgual(nivelRequerido);
-}
-
-
-    public void eliminarCompetencia(String nombreComp) {
-        competencias.remove(nombreComp);
-    }
-
-    public Nivel buscarCompetencia(String nombreComp) {
-        return competencias.get(nombreComp);
-    }
-
-    public void mostrarCompetencias() {
-        System.out.println("Competencias de " + nombre + ": " + competencias);
-    }
-
     public String getRut() { return rut; }
     public String getNombre() { return nombre; }
     public String getCiudad() { return ciudad; }
     public String getNumeroContacto() { return numeroContacto; }
     public Map<String, Nivel> getCompetencias() { return competencias; }
+
+    public void setRut(String rut) {this.rut = rut;}
+    public void setNombre(String nombre) {this.nombre = nombre;}
+    public void setCiudad(String ciudad) {this.ciudad = ciudad;}
+    public void setNumeroContacto(String numeroContacto) {this.numeroContacto = numeroContacto;}
+    public void setCompetencias(Map<String, Nivel> competencias) {this.competencias = competencias;}
+
+    public void agregarCompetencia(String nombre, Nivel nivel) {competencias.put(nombre, nivel);}
+    
+    public void agregarCompetencia(Competencia competenciaNueva) {
+        if (competenciaNueva != null) {
+            competencias.put(competenciaNueva.getNombreCompetencia(), competenciaNueva.getNivelCompetencia());
+        }
+    }
+    
+    public boolean tieneCompetenciaConNivelMinimo(String nombre, Nivel nivelRequerido) {
+        Nivel nivelPostulante = competencias.get(nombre);
+
+        if (nivelPostulante == null) {
+            return false;
+        }
+        return nivelPostulante.esMayorOIgual(nivelRequerido);
+    }
+    
+    public void eliminarCompetencia(String nombreCompetencia) {competencias.remove(nombreCompetencia);}
+
+    public Nivel buscarCompetencia(String nombreCompetencia) {return competencias.get(nombreCompetencia);}
+
+    public void mostrarCompetencias() {System.out.println("Competencias de " + nombre + ": " + competencias);}
 
     @Override
     public String toString() {
@@ -65,4 +61,6 @@ public class Postulante {
                "Competencias: " + competencias + "\n";
     }
 }
+
+
 
