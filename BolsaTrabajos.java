@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class BolsaTrabajos {
     public static void main(String[] args) {
@@ -11,7 +12,8 @@ public class BolsaTrabajos {
 
         // Datos iniciales
         Competencia[] reqs = {new Competencia("Java", Nivel.INTERMEDIO), new Competencia("SQL", Nivel.INTERMEDIO)};
-        Puesto puestoInicial = new Puesto("1234", "PROGRAMADOR", "BANCO DE CHILE", "Viña del Mar", reqs);
+        Puesto puestoInicial = new Puesto("", "PROGRAMADOR", "BANCO DE CHILE", "Viña del Mar", reqs);
+        puestoInicial.setId(1234);
 
         Postulante postulanteUno= new Postulante("266666666", "Juanito Hernandez", "Valparaiso", "949033564");
         postulanteUno.agregarCompetencia("Java", Nivel.AVANZADO);
@@ -139,9 +141,11 @@ public class BolsaTrabajos {
                                     System.out.println("Nivel inválido. Intente de nuevo.");
                                 }
                             }
-                            requisitos[i] = new Competencia(nomReq.trim(), nivelReq);
+                            requisitos[i] = new Competencia(Objects.requireNonNull(nomReq).trim(), nivelReq);
                         }
-                        Puesto nuevoPuesto = new Puesto(newId.trim(), newTitulo.trim(), newEmpresa.trim(), newCiudad.trim(), requisitos);
+                        Puesto nuevoPuesto = new Puesto("", Objects.requireNonNull(newTitulo).trim(),Objects.requireNonNull(newEmpresa).trim(),
+                        Objects.requireNonNull(newCiudad).trim(),requisitos);
+                        nuevoPuesto.setId(Integer.parseInt(newId.trim()));
                         puestos.add(nuevoPuesto);
                         System.out.println("Puesto agregado: " + nuevoPuesto.getTitulo() + " (ID: " + nuevoPuesto.getId() + ")");
                         break;
