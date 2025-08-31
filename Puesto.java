@@ -7,88 +7,68 @@ public class Puesto {
     private String titulo;
     private String empresa;
     private String ciudad;
-    private ArrayList<Postulante> postulantes; // segunda colección (anidada)
-    private String[] requisitos; // formato: "Java:INTERMEDIO"
+    private Competencia[] requisitos;
+    private ArrayList<Postulante> postulantes;
 
-    public Puesto(String id, String titulo, String empresa, String ciudad, String[] requisitos) {
+    public Puesto(String id, String titulo, String empresa, String ciudad, Competencia[] requisitos) {
         this.id = id;
         this.titulo = titulo;
         this.empresa = empresa;
         this.ciudad = ciudad;
+        this.requisitos = requisitos != null ? requisitos : new Competencia[0];
         this.postulantes = new ArrayList<>();
-        this.requisitos = (requisitos == null) ? new String[0] : requisitos.clone();
+    }
+
+    public void agregarPostulante(Postulante p) {
+        postulantes.add(p);
+    }
+
+    public boolean eliminarPostulante(String rut) {
+        return postulantes.removeIf(p -> p.getRut().equals(rut));
+    }
+
+    public boolean cumpleTodosLosRequisitos(Postulante postulante) {
+        for (Competencia req : requisitos) {
+            if (!postulante.tieneCompetenciaConNivelMinimo(req.getNombreCompetencia(), req.getNivelCompetencia())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public ArrayList<Postulante> seleccionarPostulantes() {
+        ArrayList<Postulante> seleccion = new ArrayList<>();
+        for (Postulante p : postulantes) {
+            if (cumpleTodosLosRequisitos(p)) {
+                seleccion.add(p);
+            }
+        }
+        return seleccion;
     }
 
     public String getId() { return id; }
     public String getTitulo() { return titulo; }
     public String getEmpresa() { return empresa; }
     public String getCiudad() { return ciudad; }
+    public Competencia[] getRequisitos() { return requisitos; }
     public ArrayList<Postulante> getPostulantes() { return postulantes; }
-    public String[] getRequisitos() { return requisitos.clone(); }
-
-    public void agregarPostulante(Postulante nuevoPostulante) {
-        if (nuevoPostulante != null) postulantes.add(nuevoPostulante);
-    }
-
-    private Nivel parseNivel(String nivelTexto) 
-    {
-        if (nivelTexto == null) return null;
-        try {return Nivel.valueOf(nivelTexto.trim().toUpperCase());
-        } catch (IllegalArgumentException exception) {return null;}
-    }
-
-    public boolean cumpleTodosLosRequisitos(Postulante postulanteSeleccionado) {
-    if (requisitos == null || requisitos.length == 0) return true;
-
-    for (String req : requisitos) {
-        if (req == null || req.trim().isEmpty()) continue;
-
-        String[] partes = req.split(":", 2);
-        if (partes.length != 2) {
-            System.out.println("Requisito mal formado (debe ser 'nombre:NIVEL'): '" + req + "'");
-            return false;
-        }
-        
-        String nombreReq = partes[0].trim();
-        String nivelTxt = partes[1].trim();
-        Nivel nivelReq = parseNivel(nivelTxt); 
-        
-        if (nivelReq == null) {
-            System.out.println("Nivel inválido en requisito: '" + req + "'");
-            return false; 
-        }
-        if (!postulanteSeleccionado.tieneCompetenciaConNivelMinimo(nombreReq, nivelReq)) {
-            return false;
-        }
-    }
-    return true;
+    
+    public void setRequisitos(Competencia[] nuevosRequisitos) {
+    this.requisitos = nuevosRequisitos;
 }
-
-
-    // Retorna lista de postulantes que cumplen requisitos (usa ArrayList)
-    public ArrayList<Postulante> seleccionarPostulantes() {
-        ArrayList<Postulante> seleccion = new ArrayList<>();
-        for (Postulante p : postulantes) {
-            if (cumpleTodosLosRequisitos(p)) seleccion.add(p);
-        }
-        return seleccion;
-    }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Puesto: ").append(titulo).append(" - ").append(empresa).append(" (").append(ciudad).append(")\n");
-        sb.append("Requisitos: ");
-        if (requisitos == null || requisitos.length == 0) sb.append("[]");
-        else {
-            sb.append("[");
-            for (int i = 0; i < requisitos.length; i++) {
-                sb.append(requisitos[i]);
-                if (i < requisitos.length - 1) sb.append(", ");
-            }
-            sb.append("]");
+        sb.append("Puesto: ").append(titulo).append(" en ").append(empresa)
+          .append(" | Ciudad: ").append(ciudad).append("\nRequisitos:\n");
+        for (Competencia c : requisitos) {
+            sb.append("  - ").append(c).append("\n");
         }
-        sb.append("\nPostulantes inscritos: ").append(postulantes.size());
+        sb.append("Postulantes:\n");
+        for (Postulante p : postulantes) {
+            sb.append("  * ").append(p.getNombre()).append(" (").append(p.getRut()).append(")\n");
+        }
         return sb.toString();
     }
 }
