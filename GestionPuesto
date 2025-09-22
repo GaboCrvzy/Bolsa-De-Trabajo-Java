@@ -1,0 +1,9 @@
+package proyectopoo;
+
+import java.util.HashMap;
+
+public class GestionPuesto {
+    private HashMap<String, Puesto> puestos; //ALMACENA LOS PUESTOS USA COMO CLAVE EL IDPUESTO
+}
+
+//CREAR LOS METODOS CORRESPODIENTES Y VER SI AGREGAR NUEVOS ATRIBUTOS
