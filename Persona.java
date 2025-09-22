@@ -135,7 +135,7 @@ public class Persona {
     }
     
     //METODO DE BUSCAR COMPETENCIA POR NOMBRE , NIVEL Y AMBAS
-   public Competencia buscarPorNombreComp(String nombre) 
+   public Competencia buscarPorNombreHab(String nombre) 
    {
     if (nombre == null)
     {
@@ -165,7 +165,7 @@ public class Persona {
     return null;
 }
 
-    public ArrayList<Competencia> buscarCompPorNivel(String nivel)
+    public ArrayList<Competencia> buscarHabPorNivel(String nivel)
     {
         ArrayList<Competencia> resultado = new ArrayList<>();
         if(nivel == null) return resultado;
@@ -182,14 +182,14 @@ public class Persona {
         return resultado;
     }
     
-    public boolean tieneCompetenciaConNivelMinimo(String nombreComp, String nivelMinimo)
+    public boolean tieneHabilidadConNivelMinimo(String nombreComp, String nivelMinimo)
     {
-        Competencia c = buscarPorNombreComp(nombreComp);
+        Competencia c = buscarPorNombreHab(nombreComp);
         if (c == null) return false;
         return c.cumpleCon(nivelMinimo);
     }
     
-    public boolean tieneCompetencia(String nombre)
+    public boolean tieneHabilidad(String nombre)
     {
         if(nombre == null) return false;
         
@@ -203,9 +203,49 @@ public class Persona {
         }
         return false;
     }
-    
-    //AGG METODO DE ELIMINAR POR NOMBRE O NIVEL
-    //AGG METODO DE MOSTRAR LAS COMPETENCIAS (TODAS) 
+   
+    //ELIMINA LA HABILIDADES CN ESE NOMBRE SIN IMPORTAR EL NIVEL
+    public boolean eliminarHabilidad(String nombre)
+    {
+        if(nombre == null)
+        {
+            System.out.println("NOMBRE INVALIDO (NULO)");
+            return false;
+        }
+        
+        String nombNorm = normalizarNamePersona(nombre);
+        for(int i = 0; i < habilidades.size(); i++)
+        {
+            Competencia actual = habilidades.get(i);
+            
+            if(actual != null && actual.getNombre()!= null && actual.getNombre().equals(nombre)) 
+            {
+                habilidades.remove(actual);
+                System.out.println("SE ELIMINO LA HABILIDAD :" + nombre);
+                return true;
 
+            }
+        }
+        System.out.println("NO SE PUEDO ELIMINAR LA HABILIDAD :" + nombre);
+        return false;
+    }
     
-    
+    //AGG METODO DE MOSTRAR LAS COMPETENCIAS (TODAS) 
+    public void mostrarHabilidades()
+    {
+        if (habilidades.isEmpty()) 
+        {
+            System.out.println("La persona no tiene habilidades registradas.");
+            return;
+        }
+
+        System.out.println("Habilidades de " + nombre + " (" + rut + "):");
+        for (int i = 0; i < habilidades.size(); i++) 
+        {
+            Competencia actual = habilidades.get(i);
+            if (actual != null) {
+                System.out.println(" Comptencia : " + actual.getNombre() + " - (" + actual.getNivel() + ")");
+            }
+        }
+    }
+}
