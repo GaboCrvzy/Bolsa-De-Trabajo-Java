@@ -1,0 +1,12 @@
+package proyectopoo;
+
+//REALIZAR EL MAIN MODULARIZADO (ENTRADA POR TECLADO , DATOS POR CONSOLA , VENTANAS
+
+public class ProyectoPOO {
+
+    public static void main(String[] args) {
+        GestionPuesto sistema = new GestionPuesto();
+        
+    }
+    
+}
