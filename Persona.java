@@ -1,4 +1,3 @@
-
 package proyectopoo;
 
 import java.text.Normalizer;
@@ -83,9 +82,8 @@ public class Persona {
         return nombre + " " + rut + " - Contacto: " + nroContacto + " | Numero De Habilidades: " + getCantHabilidades();
     }
     
-    //AGG METODOS DE AGG COMPETENCIA, ELIMINAR COMPETENCIA , BUSCAR COMPETENCIA, MOSTRAR COMPETENCIAS
     
-    //AGG COMPETENCIA YA CREADA
+    //AGG COMPETENCIA YA CREADA SOBRECARGAR
     public void agregarHabilidad(Competencia nuevaCompe)
     {
         if(nuevaCompe == null)
@@ -113,7 +111,7 @@ public class Persona {
                 
                 if(nuevoNivel > nivelActual)
                 {
-                    habilidades.set(i, actual);
+                    habilidades.set(i, nuevaCompe);
                     System.out.println("Competencia actualizada para " + this.rut + " : " + nuevaCompe);
                 }
                 else System.out.println("No se actualizó. Nivel existente es igual o superior.");
@@ -125,5 +123,89 @@ public class Persona {
         System.out.println("Competencia agregada a " + this.rut + ": " + nuevaCompe); 
     }
     
+    // Sobrecarga: crear y agregar desde nombre + nivel
+    public void agregarHabilidad(String nombreComp, String nivel) 
+    {
+        Competencia nuevaCompetencia = new Competencia(nombreComp, nivel);
+        if (nuevaCompetencia.getNivel() == null) {
+            System.out.println("No se agregó la competencia. Nivel inválido para: " + nombreComp);
+            return;
+        }
+        agregarHabilidad(nuevaCompetencia);
+    }
+    
+    //METODO DE BUSCAR COMPETENCIA POR NOMBRE , NIVEL Y AMBAS
+   public Competencia buscarPorNombreComp(String nombre) 
+   {
+    if (nombre == null)
+    {
+        System.out.println("NOMBRE INVALIDO (NULO)");
+        return null;
+    }
+    // normalizamos
+    String buscadoNorm = normalizarNamePersona(nombre);
+
+    if (habilidades == null || habilidades.isEmpty()) 
+    {
+        System.out.println("COMPETENCIAS VACIAS");
+        return null;
+    }
+
+    for (int i = 0; i < habilidades.size(); i++) {
+        Competencia actual = habilidades.get(i);
+        if (actual == null || actual.getNombre() == null) continue;
+
+        String actualNorm = normalizarNamePersona(actual.getNombre());
+        if (actualNorm.equals(buscadoNorm)) {
+            System.out.println("COMPETENCIA '" + nombre + "' ENCONTRADA");
+            return actual;
+        }
+    }
+    System.out.println("COMPETENCIA '" + nombre + "' NO ENCONTRADA");
+    return null;
+}
+
+    public ArrayList<Competencia> buscarCompPorNivel(String nivel)
+    {
+        ArrayList<Competencia> resultado = new ArrayList<>();
+        if(nivel == null) return resultado;
+        
+        String nivelNorm = normalizarNamePersona(nivel); 
+        for(int i = 0; i < habilidades.size(); i++)
+        {
+            Competencia actual = habilidades.get(i);
+            if(actual != null && actual.getNivel()!= null && normalizarNamePersona(actual.getNivel()).equals(nivel))
+            {
+                resultado.add(actual);
+            }
+        }
+        return resultado;
+    }
+    
+    public boolean tieneCompetenciaConNivelMinimo(String nombreComp, String nivelMinimo)
+    {
+        Competencia c = buscarPorNombreComp(nombreComp);
+        if (c == null) return false;
+        return c.cumpleCon(nivelMinimo);
+    }
+    
+    public boolean tieneCompetencia(String nombre)
+    {
+        if(nombre == null) return false;
+        
+        if (habilidades == null || habilidades.isEmpty()) return false;
+        
+        String nomNorm = normalizarNamePersona(nombre);
+        for(int i = 0; i < habilidades.size(); i++)
+        {
+            Competencia actual = habilidades.get(i);
+            if(actual != null && actual.getNombre() != null && actual.getNombre().equals(nomNorm)) return true;
+        }
+        return false;
+    }
+    
+    //AGG METODO DE ELIMINAR POR NOMBRE O NIVEL
+    //AGG METODO DE MOSTRAR LAS COMPETENCIAS (TODAS) 
+
     
     
