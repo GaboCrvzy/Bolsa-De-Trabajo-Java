@@ -18,9 +18,7 @@ public class Puesto {
         postulantes = new LinkedList<>();
         requisitos =  new ArrayList<>();
     }
-    
-    //HACER GETTER Y SETTER CON VALIDACIONES
-    
+
     public String getIdPuesto() {return idPuesto;}
     public String getNombrePuesto() {return nombrePuesto;}
     public String getDescripcionPuesto() {return descripcionPuesto;}
@@ -128,44 +126,154 @@ public class Puesto {
         System.out.println("ID Puesto: " + idPuesto);
         System.out.println("Nombre Puesto: " + nombrePuesto);
         System.out.println("Descripción: " + descripcionPuesto);
-    
+
         System.out.println("\nPostulantes:");
-        if (postulantes.isEmpty())
-        {
+        if (postulantes.isEmpty()) {
             System.out.println("No hay postulantes.");
-        } 
-        else {
-            for (Persona p : postulantes) 
-            {
-                if (p != null)
-                { 
+        }   else {
+            for (Persona p : postulantes) {
+                if (p != null) {
                     System.out.println("RUT: " + p.getRut() + ", Nombre: " + p.getNombre());
                 }
             }
         }
-
         System.out.println("\nRequisitos:");
-        if (requisitos.isEmpty()) 
-        {
+        if (requisitos.isEmpty()) {
             System.out.println("No hay requisitos.");
-        } 
-        else {
-            for (Competencia c : requisitos) 
+        }   else {
+            for (Competencia c : requisitos) {
+                if (c != null) {
+                    String nom = (c.getNombre() != null) ? c.getNombre() : "?";
+                    String niv = (c.getNivel() != null) ? c.getNivel() : "?";
+                    System.out.println("- " + nom + " (" + niv + ")");
+                }
+            }
+    }
+    }
+    
+    //AGG CON SOBRECARGA
+    public void agregarRequisito(Competencia req)
+    {
+        if(req == null)
+        {
+            System.out.println("REQUISITO INVALIDO (NULO)");
+            return;
+        }
+        
+        if(req.getNivel() == null || !req.esNivelValido(req.getNivel()))
+        {
+            System.out.println("REQUISITO INVALIDO: nivel inválido para '" + req.getNombre() + "'.");
+            return;
+        }
+        
+        for (int i = 0; i < requisitos.size(); i++)
+        {
+            Competencia actual = requisitos.get(i);
+            if (actual == null || actual.getNombre() == null) continue;
+            String nombreActual = actual.getNombre();
+            
+            if (nombreActual.equals(req.getNombre())) 
             {
-                System.out.println("- " + c.getNombre()); 
+                int rankNuevo = req.nivelToRank(req.getNivel());
+                int rankActual = actual.nivelToRank(actual.getNivel());
+                if (rankNuevo > rankActual) 
+                {
+                    requisitos.set(i, req);
+                    System.out.println("Requisito actualizado: " + req.getNombre() + " (" + req.getNivel() + ")");
+                }  else {
+                    System.out.println("No se actualizó el requisito. El nivel existente es igual o superior.");
+                }
+                return;
             }
         }
+        requisitos.add(req);
+        System.out.println("Requisito agregado: " + req.getNombre() + " (" + req.getNivel() + ")");
     }
+        
+    public void agregarRequisito(String nombre, String nivel)
+    {
+        if(nombre == null || nivel == null)
+        {
+            System.out.println("REQUISITO INVALIDO (NULO)");
+            return;
+        }
+        Competencia nueva = new Competencia(nombre, nivel);
+        agregarRequisito(nueva);
+    }
+    
+    //ElIMINA REQ Y DEVUELVE BOOLEAN SI LO HACE
+    public boolean eliminarReq(String nombre)
+    {
+        if(nombre == null) return false;
+        
+        String nombreNorm = java.text.Normalizer.normalize(nombre.trim().toUpperCase(), java.text.Normalizer.Form.NFD).replaceAll("\\p{M}", "").replaceAll("[^A-Z0-9 ]", "");
+        
+        if (nombreNorm.isEmpty()) {
+            System.out.println("NOMBRE INVALIDO TRAS NORMALIZAR");
+            return false;
+        }
 
-    //AGG REQ, ELIMINAR REQ, MOSTRAR REQ
-    //SELECIONAR POSTULANTES (FILTRAR POR REQUISITOS Y HABILIDADES) AUTOMATICAMNTE DE ACUERDO AL CRITERIO
+        java.util.Iterator<Competencia> it = requisitos.iterator();
+        while (it.hasNext()) 
+        {
+            Competencia actual = it.next();
+            if (actual == null || actual.getNombre() == null) continue;
 
+            if (actual.getNombre().equals(nombreNorm))
+            {
+                it.remove();
+                System.out.println("Requisito eliminado: " + actual.getNombre() + " (" + actual.getNivel() + ")");
+                return true;
+            }
+        }
+        System.out.println("No se encontró requisito con nombre: " + nombre);
+        return false;   
+    }
     
+    public void mostrarRequisitos() 
+    {
+        System.out.println("Requisitos del puesto " + nombrePuesto + " (ID: " + idPuesto + "):");
+
+        if (requisitos == null || requisitos.isEmpty()) {
+            System.out.println(" - No hay requisitos.");
+            return;
+        }
+
+        for (int i = 0; i < requisitos.size(); i++) {
+            Competencia c = requisitos.get(i);
+            if (c == null) continue;
+            System.out.println(" " + (i + 1) + ". " + c); // imprime c.toString()
+        }
+    }
     
-    
-    
-    
-    
-    
+    //SELECIONAR POSTULANTES (FILTRAR POR REQUISITOS Y HABILIDADES) AUTOMATICAMNTE DE ACUERDO AL CRITERIO QUE NECESITE EL PUESTO
+    public LinkedList<Persona> seleccionarPostulantes() 
+    {
+        LinkedList<Persona> seleccion = new LinkedList<>();
+
+        if (postulantes == null || postulantes.isEmpty()) return seleccion;
+        if (requisitos == null || requisitos.isEmpty())
+        {
+            seleccion.addAll(postulantes);
+            return seleccion;
+        }
+
+        for (Persona p : postulantes)
+        {
+            if (p == null) continue;
+            boolean cumpleTodos = true;
+            
+            for (Competencia req : requisitos) 
+            {
+                if (req == null) continue;
+                if (!p.tieneCompetenciaConNivelMinimo(req.getNombre(), req.getNivel())) {
+                    cumpleTodos = false;
+                    break;
+                }
+            }
+            if (cumpleTodos) seleccion.add(p);
+        }
+        return seleccion;
+    } 
 }
 
