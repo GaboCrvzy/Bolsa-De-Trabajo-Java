@@ -86,7 +86,77 @@ public class Puesto {
         }
         this.descripcionPuesto = desc;
     }
-    //AGG POSTULANTE , ELIMINAR , BUSCAR ,MOSTRAR PUESTO
+    
+    public void agregarPostulante(Persona candidato)
+    {
+        if(candidato == null)
+        {
+            System.out.println("POSTULANTE INVALIDO (NULO)");
+            return;
+        }
+        
+        for (Persona actual : postulantes) 
+        {
+            if (actual != null && candidato.getRut() != null && actual.getRut().equals(candidato.getRut()))
+            {
+                System.out.println("EL POSTULANTE YA EXISTE: " + candidato.getRut());
+                return;
+            }
+        }
+        postulantes.add(candidato);
+        System.out.println("Postulante agregado: " + candidato.getRut());
+    }
+    
+    public boolean eliminarPostulantePorRut(String rut) 
+    {
+        if (rut == null) return false;
+        return postulantes.removeIf(actual -> actual != null && rut.equals(actual.getRut()));
+    }
+    
+    public Persona buscarPostulante(String rut)
+    {
+        if (rut == null) return null;
+        for (Persona actual : postulantes) 
+        {
+            if (actual != null && rut.equals(actual.getRut())) return actual;
+        }
+        return null;
+    }
+    
+    public void mostrarPuesto() 
+    {
+        System.out.println("ID Puesto: " + idPuesto);
+        System.out.println("Nombre Puesto: " + nombrePuesto);
+        System.out.println("Descripción: " + descripcionPuesto);
+    
+        System.out.println("\nPostulantes:");
+        if (postulantes.isEmpty())
+        {
+            System.out.println("No hay postulantes.");
+        } 
+        else {
+            for (Persona p : postulantes) 
+            {
+                if (p != null)
+                { 
+                    System.out.println("RUT: " + p.getRut() + ", Nombre: " + p.getNombre());
+                }
+            }
+        }
+
+        System.out.println("\nRequisitos:");
+        if (requisitos.isEmpty()) 
+        {
+            System.out.println("No hay requisitos.");
+        } 
+        else {
+            for (Competencia c : requisitos) 
+            {
+                System.out.println("- " + c.getNombre()); 
+            }
+        }
+    }
+
     //AGG REQ, ELIMINAR REQ, MOSTRAR REQ
     //SELECIONAR POSTULANTES (FILTRAR POR REQUISITOS Y HABILIDADES) AUTOMATICAMNTE DE ACUERDO AL CRITERIO
 
@@ -98,3 +168,4 @@ public class Puesto {
     
     
 }
+
