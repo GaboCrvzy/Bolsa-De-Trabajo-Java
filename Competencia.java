@@ -101,9 +101,8 @@ public class Competencia {
     }
 
     @Override
-    public String toString() {
-        return "Competencia{" + "nombre = " + nombre + ", nivel = " + nivel + '}';
-    }
+    public String toString(){return nombre + " (" + nivel + ")";}
 }
     
+
 
