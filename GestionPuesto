@@ -1,10 +1,135 @@
 package proyectopoo;
 
-import java.util.HashMap;
+import java.util.*;
+import java.text.Normalizer;
 
 public class GestionPuesto {
-    private HashMap<String, Puesto> puestos; //ALMACENA LOS PUESTOS USA COMO CLAVE EL IDPUESTO Y VALIDAR QUE EL ID DE PUESTO SEA UNICO
-    
-}
+    private HashMap<String, Puesto> puestos; // idPuesto -> Puesto
 
-//CREAR LOS METODOS CORRESPODIENTES Y VER SI AGREGAR NUEVOS ATRIBUTOS
+    public GestionPuesto() {
+        this.puestos = new HashMap<>();
+    }
+
+    public boolean agregarPuesto(Puesto p) {
+        if (p == null) {
+            System.out.println("No se puede agregar puesto: objeto Puesto nulo.");
+            return false;
+        }
+        String id = p.getIdPuesto();
+        if (id == null) {
+            System.out.println("No se puede agregar puesto: idPuesto nulo.");
+            return false;
+        }
+        
+        if (!id.matches("\\d+")) {
+            System.out.println("ID puesto invalido. Debe contener solo digitos.");
+            return false;
+        }
+        // Verificar unicidad
+        if (puestos.containsKey(id)) {
+            System.out.println("No se puede agregar puesto: idPuesto ya existente -> " + id);
+            return false;
+        }
+        puestos.put(id, p);
+        System.out.println("Puesto agregado: id = " + id + " | nombre = " + p.getNombrePuesto());
+        return true;
+    }
+
+    public Puesto eliminarPuesto(String idPuesto) {
+        if (idPuesto == null) {
+            System.out.println("ID PUESTO inválido (nulo).");
+            return null;
+        }
+        if (!puestos.containsKey(idPuesto)) {
+            System.out.println("No se encontró puesto con id: " + idPuesto);
+            return null;
+        }
+        Puesto eliminado = puestos.remove(idPuesto);
+        System.out.println("Puesto eliminado: id = " + idPuesto);
+        return eliminado;
+    }
+
+    public Puesto obtenerPuesto(String idPuesto) {
+        if (idPuesto == null) {
+            System.out.println("ID PUESTO inválido (nulo).");
+            return null;
+        }
+        Puesto p = puestos.get(idPuesto);
+        if (p == null) {
+            System.out.println("No existe puesto con id: " + idPuesto);
+        }
+        return p;
+    }
+
+    public boolean actualizarPuesto(String idPuesto, String nuevoNombre, String nuevaDescripcion) {
+        if (idPuesto == null) {
+            System.out.println("ID puesto invalido.");
+            return false;
+        }
+        Puesto p = puestos.get(idPuesto);
+        if (p == null) {
+            System.out.println("No existe puesto con id: " + idPuesto);
+            return false;
+        }
+
+        boolean aplicado = false;
+
+        
+        if (nuevoNombre != null) {
+            String normNombre = normalizarNombrePuesto(nuevoNombre);
+            
+            if (normNombre.isEmpty() || !normNombre.matches("^[A-Z ]+$")) {
+                System.out.println("Nombre de puesto invalido. No se puede actualizar el nombre.");
+            } else {
+                p.setNombrePuesto(nuevoNombre); 
+                
+                if (Objects.equals(p.getNombrePuesto(), normNombre)) {
+                    aplicado = true;
+                    System.out.println("Nombre actualizado para id " + idPuesto + " -> " + p.getNombrePuesto());
+                } else {
+                    
+                    System.out.println("El setter rechazó el nuevo nombre después de validarlo.");
+                }
+            }
+        }
+
+        
+        if (nuevaDescripcion != null) {
+            String trimmed = nuevaDescripcion.trim();
+            if (trimmed.isEmpty()) {
+                System.out.println("Descripción inválida (vacía). No se puede actualizar la descripcion.");
+            } else {
+                p.setDescripcionPuesto(nuevaDescripcion); 
+                
+                String descActual = p.getDescripcionPuesto();
+                boolean coincide;
+                if (trimmed.length() <= 500) {
+                    coincide = Objects.equals(descActual, trimmed);
+                } else {
+                    String esperado = trimmed.substring(0, 500).trim();
+                    coincide = Objects.equals(descActual, esperado);
+                }
+                if (coincide) {
+                    aplicado = true;
+                    System.out.println("Descripcion actualizada para id " + idPuesto);
+                } else {
+                    System.out.println("El setter rechazó o modificó la descripción (posible error).");
+                }
+            }
+        }
+
+        if (!aplicado) {
+            System.out.println("No se aplicó ningún cambio al puesto con id: " + idPuesto);
+        }
+        return aplicado;
+    }
+
+
+    // Normaliza nombre similar a lo que hace Puesto.setNombrePuesto (mayúsculas, sin tildes, solo A-Z y espacios)
+    private String normalizarNombrePuesto(String nombre) {
+        if (nombre == null) return "";
+        String aux = Normalizer.normalize(nombre.trim().toUpperCase(), Normalizer.Form.NFD).replaceAll("\\p{M}", "");
+        aux = aux.replaceAll("[^A-Z ]", "");
+        return aux;
+    }
+}
