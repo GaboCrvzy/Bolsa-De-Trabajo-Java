@@ -74,9 +74,8 @@ public class Persona {
         return aux;
     } 
     
-    public int getCantHabilidades() { return habilidades.size();}
-    public ArrayList<Competencia> getHabilidades() { return new ArrayList<>(habilidades);}
-
+    public int getCantHabilidades(){ return habilidades.size();}
+    
     @Override
     public String toString() {
         return nombre + " " + rut + " - Contacto: " + nroContacto + " | Numero De Habilidades: " + getCantHabilidades();
