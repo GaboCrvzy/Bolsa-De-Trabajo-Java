@@ -247,4 +247,14 @@ public class Persona {
             }
         }
     }
+
+    public boolean tieneCompetenciaConNivelMinimo(String nombreComp, String nivelMinimo) 
+    {
+        if (nombreComp == null || nivelMinimo == null) return false;
+
+        Competencia c = buscarPorNombreHab(nombreComp);
+        if (c == null) return false;
+        return c.cumpleCon(nivelMinimo);
+    }
 }
+
