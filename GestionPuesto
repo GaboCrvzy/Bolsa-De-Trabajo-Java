@@ -96,15 +96,9 @@ public class GestionPuesto {
     public boolean agregarPostulanteAPuesto(String idPuesto, Persona candidato)
     {
         String id = normalizeId(idPuesto);
-        if (id == null) {
-            System.out.println("ID inválido al agregar postulante.");
-            return false;
-        }
+        if (id == null) {return false;}
         Puesto p = puestos.get(id);
-        if (p == null) {
-            System.out.println("No existe puesto con id: " + id);
-            return false;
-        }
+        if (p == null) {return false;}
         p.agregarPostulante(candidato);
         return true;
     }
