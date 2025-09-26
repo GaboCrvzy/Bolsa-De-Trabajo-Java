@@ -1,41 +1,26 @@
 package proyectopoo;
 
+import java.io.*;
 import java.util.*;
-import java.text.Normalizer;
 
-public class GestionPuesto {
-    private HashMap<String, Puesto> puestos; // idPuesto -> Puesto
+class GestionPuesto
+{
+    private HashMap<String, Puesto> puestos;
 
     public GestionPuesto() {
         this.puestos = new HashMap<>();
     }
 
-    public boolean agregarPuesto(Puesto p)
+    public boolean agregarPuesto(Puesto p) 
     {
-        if (p == null) {
-            System.out.println("No se puede agregar puesto (nulo).");
-            return false;
-        }
-        String id = p.getIdPuesto();
-        if (id == null) 
-        {
-            System.out.println("No se puede agregar puesto: id puesto nulo.");
-            return false;
-        }
+        if (p == null) {return false;}
+        String rawId = p.getIdPuesto();
+        String id = normalizeId(rawId);
         
-        if (!id.matches("\\d+"))
-        {
-            System.out.println("ID puesto invalido. Debe contener solo digitos.");
-            return false;
-        }
+        if (id == null) { System.out.println("No se puede agregar puesto: id puesto nulo o inválido."); return false; }
+        if (puestos.containsKey(id)) { System.out.println("No se puede agregar puesto: idPuesto ya existente -> " + id); return false;}
         
-        // Verificar unicidad
-        if (puestos.containsKey(id))
-        {
-            System.out.println("No se puede agregar puesto: idPuesto ya existente -> " + id);
-            return false;
-        }
-        
+        p.setIdPuesto(id); 
         puestos.put(id, p);
         System.out.println("Puesto agregado: id = " + id + " | nombre = " + p.getNombrePuesto());
         return true;
@@ -43,133 +28,345 @@ public class GestionPuesto {
 
     public Puesto eliminarPuesto(String idPuesto) 
     {
-        if (idPuesto == null)
-        {
-            System.out.println("ID PUESTO inválido (nulo).");
-            return null;
-        }
-        if (!puestos.containsKey(idPuesto)) 
-        {
-            System.out.println("No se encontró puesto con id: " + idPuesto);
-            return null;
-        }
-        Puesto eliminado = puestos.remove(idPuesto);
-        System.out.println("Puesto eliminado: id = " + idPuesto);
+        String id = normalizeId(idPuesto);
+        if (id == null) { System.out.println("ID PUESTO inválido (nulo)."); return null; }
+        
+        Puesto eliminado = puestos.remove(id);
+        
+        if (eliminado == null) { System.out.println("No se encontró puesto con id: " + id); return null; }
+        System.out.println("Puesto eliminado: id = " + id);
         return eliminado;
     }
 
-    public Puesto obtenerPuesto(String idPuesto) 
+    public Puesto obtenerPuesto(String idPuesto)
     {
-        if (idPuesto == null)
-        {
-            System.out.println("ID PUESTO inválido (nulo).");
-            return null;
-        }
-        Puesto p = puestos.get(idPuesto);
-        if (p == null) {
-            System.out.println("No existe puesto con id: " + idPuesto);
-        }
+        String id = normalizeId(idPuesto);
+        if (id == null) { System.out.println("ID PUESTO inválido (nulo)."); return null; }
+        
+        Puesto p = puestos.get(id);
+        if (p == null) System.out.println("No existe puesto con id: " + id);
         return p;
     }
-    
-    //VERIFICA QUE EXISTA UN PUESTO DENTRO DEL MAPA
-    public boolean existePuesto(String idPuesto) {
+
+    public boolean actualizarPuesto(Puesto nuevoPuesto) 
+    {
+        if (nuevoPuesto == null) { System.out.println("No se puede actualizar puesto (nulo)."); return false; }
+        String id = normalizeId(nuevoPuesto.getIdPuesto());
+        
+        if (id == null) { System.out.println("ID PUESTO inválido."); return false; }
+        if (!puestos.containsKey(id)) { System.out.println("No existe puesto con id: " + id); return false; }
+        
+        nuevoPuesto.setIdPuesto(id);
+        puestos.put(id, nuevoPuesto);
+        
+        System.out.println("Puesto actualizado: id = " + id + " | nombre = " + nuevoPuesto.getNombrePuesto());
+        return true;
+    }
+
+    public boolean existePuesto(String idPuesto)
+    {
         String id = normalizeId(idPuesto);
         if (id == null) return false;
         return puestos.containsKey(id);
     }
-    
-    //LISTAR PUESTOS (COPIA)
-    public List<Puesto> listarPuestos() {return new ArrayList<>(puestos.values());}
-    
-    public List<String> listarIds() 
+
+    public List<Puesto> listarPuestos() { return new ArrayList<>(puestos.values());}
+
+    public List<String> listarIds()
     {
         List<String> ids = new ArrayList<>(puestos.keySet());
         Collections.sort(ids);
         return ids;
     }
-    
-    //CONTADOR DE CUANTOS PUESTOS EXISTEN
-    public int contarPuestos() {return puestos.size();}
-    
-    //AGG PERSONA A PUESTO
-    public boolean agregarPostulanteAPuesto(String idPuesto, Persona candidato)
+
+    public int contarPuestos() { return puestos.size();}
+
+    public void imprimirResumen()
     {
+        if (puestos.isEmpty()) { System.out.println("No hay puestos registrados."); return; }
+        System.out.println("=== Resumen de Puestos ===");
+        for (Puesto p : puestos.values()) {
+            p.mostrarPuesto();
+            System.out.println("-------------------------");
+        }
+    }
+
+    public boolean agregarPostulanteAPuesto(String idPuesto, Persona candidato) 
+    {
+        if (candidato == null) { System.out.println("Candidato nulo. No se agrega."); return false; }
         String id = normalizeId(idPuesto);
-        if (id == null) {return false;}
+        
+        if (id == null) { System.out.println("ID inválido al agregar postulante."); return false; }
         Puesto p = puestos.get(id);
-        if (p == null) {return false;}
+        
+        if (p == null) { System.out.println("No existe puesto con id: " + id); return false; }
+        if (candidato.getRut() != null && p.buscarPostulante(candidato.getRut()) != null) {
+            System.out.println("El postulante ya está inscrito en el puesto: " + candidato.getRut());
+            return false;
+        }
+        
         p.agregarPostulante(candidato);
         return true;
     }
-    
-    //ELIMINAR PERSONA DE UN PUESTO DE ACUERDO AL RUT
+
     public boolean eliminarPostulanteDePuesto(String idPuesto, String rutPostulante) 
     {
         String id = normalizeId(idPuesto);
         if (id == null) return false;
         Puesto p = puestos.get(id);
+        
         if (p == null) return false;
         return p.eliminarPostulantePorRut(rutPostulante);
     }
-    
-    //AGG REQ A PUESTO
+
     public boolean agregarRequisitoAPuesto(String idPuesto, Competencia req) 
     {
         String id = normalizeId(idPuesto);
         if (id == null) return false;
         Puesto p = puestos.get(id);
-        if (p == null) {
-            System.out.println("Puesto no encontrado: " + id);
-            return false;
-        }
+        
+        if (p == null) { System.out.println("Puesto no encontrado: " + id); return false; }
         p.agregarRequisito(req);
         return true;
     }
-    
-    //ACTULIZAR PUESTO
-    public boolean actualizarPuesto(Puesto nuevoPuesto) 
-    {
-        if (nuevoPuesto == null) {
-            System.out.println("No se puede actualizar puesto (nulo).");
-            return false;
-        }
-        String id = nuevoPuesto.getIdPuesto();
-        if (id == null || !id.matches("\\d+")) {
-            System.out.println("ID PUESTO inválido.");
-            return false;
-        }
-        if (!puestos.containsKey(id)) {
-            System.out.println("No existe puesto con id: " + id);
-            return false;
-        }
-        puestos.put(id, nuevoPuesto);
-        System.out.println("Puesto actualizado: id = " + id + " | nombre = " + nuevoPuesto.getNombrePuesto());
-        return true;
-    }
-    
-    //SELECCIONAR POSTULANTES DE ACUERDO AL ID DEL PUESTO
+
     public LinkedList<Persona> seleccionarPostulantes(String idPuesto) 
     {
         String id = normalizeId(idPuesto);
         LinkedList<Persona> vacio = new LinkedList<>();
         if (id == null) return vacio;
         Puesto p = puestos.get(id);
+        
         if (p == null) return vacio;
         return p.seleccionarPostulantes();
     }
-    
-    //MUESTRA TODOS LOS PUESTOS Y SU INFO
-    public void imprimirResumen() 
+
+    public Persona buscarPostulanteGlobal(String rut)
     {
-        if (puestos.isEmpty()) {
-            System.out.println("No hay puestos registrados.");
+        if (rut == null) return null;
+        for (Puesto p : puestos.values())
+        {
+            Persona found = p.buscarPostulante(rut);
+            if (found != null) return found;
+        }
+        return null;
+    }
+
+    // Buscar puestos que requieren una competencia con nivel minimo
+    public List<Puesto> buscarPuestosPorCompetencia(String nombreCompetencia, String nivelMinimo)
+    {
+        List<Puesto> resultado = new ArrayList<>();
+        if (nombreCompetencia == null || nivelMinimo == null) return resultado;
+        
+        String buscadoNorm = java.text.Normalizer.normalize(nombreCompetencia.trim().toUpperCase(), java.text.Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "").replaceAll("[^A-Z0-9 ]", "");
+        
+        for (Puesto p : puestos.values()) {
+            if (p == null) continue;
+            for (Competencia req : p.getRequisitos())
+            {
+                if (req == null || req.getNombre() == null) continue;
+                String reqNorm = java.text.Normalizer.normalize(req.getNombre().trim().toUpperCase(), java.text.Normalizer.Form.NFD)
+                        .replaceAll("\\p{M}", "").replaceAll("[^A-Z0-9 ]", "");
+                
+                if (reqNorm.equals(buscadoNorm) && req.cumpleCon(nivelMinimo)) {
+                    resultado.add(p);
+                    break;
+                }
+            }
+        }
+        return resultado;
+    }
+
+    public boolean guardarEnDir(String dir)
+    {
+        try {
+            File folder = new File(dir);
+            if (!folder.exists()) folder.mkdirs();
+
+            // puestos.csv -> id;nombre;descripcion
+            try (PrintWriter pw = new PrintWriter(new FileWriter(new File(folder, "puestos.csv")))) {
+                pw.println("id;nombre;descripcion");
+                for (Puesto p : puestos.values()) {
+                    pw.println(escapeCsv(p.getIdPuesto()) + ";" +
+                               escapeCsv(p.getNombrePuesto()) + ";" +
+                               escapeCsv(p.getDescripcionPuesto()));
+                }
+            }
+            // requisitos.csv -> idPuesto;nombreCompetencia;nivel
+            try (PrintWriter pw = new PrintWriter(new FileWriter(new File(folder, "requisitos.csv")))) {
+                pw.println("idPuesto;nombreCompetencia;nivel");
+                for (Puesto p : puestos.values()) {
+                    for (Competencia req : p.getRequisitos()) {
+                        if (req == null) continue;
+                        pw.println(escapeCsv(p.getIdPuesto()) + ";" +
+                                   escapeCsv(req.getNombre()) + ";" +
+                                   escapeCsv(req.getNivel()));
+                    }
+                }
+            }
+            // postulantes.csv -> rut;nombre;ciudad;contacto;idPuesto
+            try (PrintWriter pw = new PrintWriter(new FileWriter(new File(folder, "postulantes.csv")))) {
+                pw.println("rut;nombre;ciudad;contacto;idPuesto");
+                for (Puesto p : puestos.values()) {
+                    for (Persona pers : p.getPostulantes()) {
+                        pw.println(escapeCsv(pers.getRut()) + ";" +
+                                   escapeCsv(pers.getNombre()) + ";" +
+                                   escapeCsv(pers.getCiudad()) + ";" +
+                                   escapeCsv(pers.getNroContacto()) + ";" +
+                                   escapeCsv(p.getIdPuesto()));
+                    }
+                }
+            }
+            // habilidades.csv -> rut;nombreCompetencia;nivel
+            try (PrintWriter pw = new PrintWriter(new FileWriter(new File(folder, "habilidades.csv")))) {
+                pw.println("rut;nombreCompetencia;nivel");
+                for (Puesto p : puestos.values()) {
+                    for (Persona pers : p.getPostulantes()) {
+                        for (Competencia hab : pers.getHabilidades()) {
+                            if (hab == null) continue;
+                            pw.println(escapeCsv(pers.getRut()) + ";" +
+                                       escapeCsv(hab.getNombre()) + ";" +
+                                       escapeCsv(hab.getNivel()));
+                        }
+                    }
+                }
+            }
+            System.out.println("Datos guardados en directorio: " + dir);
+            return true;
+        } catch (IOException e) {
+            System.out.println("Error al guardar datos: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // Cargar desde directorio
+    public void cargarDesdeDir(String dir) 
+    {
+        File folder = new File(dir);
+        if (!folder.exists() || !folder.isDirectory()) {
+            System.out.println("Directorio de datos no encontrado: " + dir + " (se omite carga automática)");
             return;
         }
-        System.out.println("=== Resumen de Puestos ===");
-        for (Puesto p : puestos.values()) {
-            p.mostrarPuesto();
-            System.out.println("-------------------------");
+
+        // 1) puestos.csv
+        File fPuestos = new File(folder, "puestos.csv");
+        if (fPuestos.exists()) {
+            try (BufferedReader br = new BufferedReader(new FileReader(fPuestos))) {
+                String linea = br.readLine();
+                
+                while ((linea = br.readLine()) != null) {
+                    String[] cols = linea.split(";", -1);
+                    if (cols.length < 3) continue;
+                    
+                    String id = normalizeId(cols[0]);
+                    String nombre = cols[1];
+                    String descripcion = cols[2];
+                    
+                    if (id == null) { System.out.println("Se saltó puesto con id inválido en puestos.csv: " + linea); continue; }
+                    Puesto p = new Puesto(id, nombre, descripcion);
+                    puestos.put(id, p);
+                }
+            } catch (IOException e) { System.out.println("Error leyendo puestos.csv: " + e.getMessage()); }
+        }
+
+        // 2) requisitos.csv
+        File fReq = new File(folder, "requisitos.csv");
+        if (fReq.exists())
+        {
+            try (BufferedReader br = new BufferedReader(new FileReader(fReq))) {
+                String linea = br.readLine();
+                
+                while ((linea = br.readLine()) != null) {
+                    String[] cols = linea.split(";", -1);
+                    if (cols.length < 3) continue;
+                    
+                    String id = normalizeId(cols[0]);
+                    String nomReq = cols[1];
+                    String nivel = cols[2];
+                    
+                    if (id == null) continue;
+                    Puesto p = puestos.get(id);
+                    
+                    if (p == null) { System.out.println("Requisito para puesto inexistente (id=" + id + ") omitido."); continue; }
+                    Competencia c = new Competencia(nomReq, nivel);
+                    if (c.getNivel() == null) { System.out.println("Omitido requisito inválido para puesto " + id + ": " + nomReq + " - " + nivel); continue; }
+                    p.agregarRequisito(c);
+                }
+            } catch (IOException e) { System.out.println("Error leyendo requisitos.csv: " + e.getMessage()); }
+        }
+
+        // 3) postulantes.csv
+        File fPost = new File(folder, "postulantes.csv");
+        if (fPost.exists()) {
+            try (BufferedReader br = new BufferedReader(new FileReader(fPost))) {
+                String linea = br.readLine();
+                
+                while ((linea = br.readLine()) != null) {
+                    String[] cols = linea.split(";", -1);
+                    if (cols.length < 5) continue;
+                    
+                    String rut = cols[0];
+                    String nombre = cols[1];
+                    String ciudad = cols[2];
+                    String contacto = cols[3];
+                    String idPuesto = normalizeId(cols[4]);
+                    
+                    if (idPuesto == null) continue;
+                    Puesto p = puestos.get(idPuesto);
+                    if (p == null) { System.out.println("Postulante referenciado a puesto inexistente (id=" + idPuesto + ") omitido: " + rut); continue; }
+                    Persona per = new Persona(rut, nombre, ciudad, contacto);
+                    p.agregarPostulante(per);
+                }
+            } catch (IOException e) { System.out.println("Error leyendo postulantes.csv: " + e.getMessage()); }
+        }
+
+        // 4) habilidades.csv
+        File fHabs = new File(folder, "habilidades.csv");
+        if (fHabs.exists()) {
+            try (BufferedReader br = new BufferedReader(new FileReader(fHabs))) {
+                String linea = br.readLine();
+                
+                while ((linea = br.readLine()) != null) {
+                    String[] cols = linea.split(";", -1);
+                    if (cols.length < 3) continue;
+                    String rut = cols[0];
+                    String nomHab = cols[1];
+                    String nivel = cols[2];
+                    Persona pFound = buscarPostulanteGlobal(rut);
+                    
+                    if (pFound == null) { System.out.println("Habilidad para postulante no existente (rut=" + rut + ") omitida."); continue; }
+                    Competencia comp = new Competencia(nomHab, nivel);
+                    if (comp.getNivel() == null) { System.out.println("Omitida habilidad inválida para postulante " + rut + ": " + nomHab + " - " + nivel); continue; }
+                    pFound.agregarHabilidad(comp);
+                }
+            } catch (IOException e) { System.out.println("Error leyendo habilidades.csv: " + e.getMessage()); }
+        }
+
+        System.out.println("Carga desde directorio '" + dir + "' finalizada.");
+    }
+
+    public boolean exportarReporteTxt(String rutaArchivo)
+    {
+        try (PrintWriter pw = new PrintWriter(new FileWriter(rutaArchivo))) {
+            for (Puesto p : puestos.values()) {
+                pw.println("Puesto; " + p.getIdPuesto() + "; " + p.getNombrePuesto());
+                pw.println("Descripcion; " + p.getDescripcionPuesto());
+                pw.println("Requisitos:");
+                for (Competencia r : p.getRequisitos()) pw.println(" - " + r.getNombre() + ";" + r.getNivel());
+                pw.println("Postulantes:");
+                for (Persona per : p.getPostulantes()) {
+                    pw.println(" * " + per.getRut() + ";" + per.getNombre() + ";" + per.getCiudad() + ";" + per.getNroContacto());
+                    pw.println("   Habilidades:");
+                    for (Competencia hab : per.getHabilidades()) pw.println("    - " + hab.getNombre() + ";" + hab.getNivel());
+                }
+                pw.println("--------------------------------------------------");
+            }
+            System.out.println("Reporte generado en: " + rutaArchivo);
+            return true;
+        } catch (IOException e) {
+            System.out.println("Error exportando reporte: " + e.getMessage());
+            return false;
         }
     }
     
@@ -177,5 +374,10 @@ public class GestionPuesto {
         if (id == null) return null;
         String s = id.trim().replaceAll("[^0-9]", "");
         return s.isEmpty() ? null : s;
+    }
+
+    public String escapeCsv(String s) {
+        if (s == null) return "";
+        return s.replace(";", ",").replace("\n", " ").replace("\r", " ");
     }
 }
