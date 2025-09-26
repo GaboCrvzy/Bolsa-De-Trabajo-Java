@@ -1,4 +1,3 @@
-
 package proyectopoo;
 
 import java.text.Normalizer;
@@ -85,6 +84,11 @@ public class Puesto {
         this.descripcionPuesto = desc;
     }
     
+    public LinkedList<Persona> getPostulantes() { return new LinkedList<>(postulantes); }
+    public ArrayList<Competencia> getRequisitos() { return new ArrayList<>(requisitos); }
+    
+    
+    //METODOS DE POSTULANTES
     public void agregarPostulante(Persona candidato)
     {
         if(candidato == null)
@@ -104,7 +108,6 @@ public class Puesto {
         postulantes.add(candidato);
         System.out.println("Postulante agregado: " + candidato.getRut());
     }
-    
     public boolean eliminarPostulantePorRut(String rut) 
     {
         if (rut == null) return false;
@@ -148,9 +151,10 @@ public class Puesto {
                     System.out.println("- " + nom + " (" + niv + ")");
                 }
             }
-    }
+        }
     }
     
+    //METODOS DE REQUISITOS
     //AGG CON SOBRECARGA
     public void agregarRequisito(Competencia req)
     {
@@ -188,16 +192,16 @@ public class Puesto {
         }
         requisitos.add(req);
         System.out.println("Requisito agregado: " + req.getNombre() + " (" + req.getNivel() + ")");
-    }
+    }     
+    
+    public void agregarRequisito(String nombre, String nivel) {
+        if (nombre == null || nivel == null) { System.out.println("REQUISITO INVALIDO (NULO)"); return; }
         
-    public void agregarRequisito(String nombre, String nivel)
-    {
-        if(nombre == null || nivel == null)
-        {
-            System.out.println("REQUISITO INVALIDO (NULO)");
+        Competencia nueva = new Competencia(nombre, nivel);
+        if (nueva.getNivel() == null) {
+            System.out.println("No se agregó el requisito. Nivel inválido: " + nivel);
             return;
         }
-        Competencia nueva = new Competencia(nombre, nivel);
         agregarRequisito(nueva);
     }
     
@@ -205,7 +209,6 @@ public class Puesto {
     public boolean eliminarReq(String nombre)
     {
         if(nombre == null) return false;
-        
         String nombreNorm = java.text.Normalizer.normalize(nombre.trim().toUpperCase(), java.text.Normalizer.Form.NFD).replaceAll("\\p{M}", "").replaceAll("[^A-Z0-9 ]", "");
         
         if (nombreNorm.isEmpty()) {
@@ -230,6 +233,29 @@ public class Puesto {
         return false;   
     }
     
+    // devuelve true si editó el requisito
+    public boolean editarRequisito(String nombre, String nuevoNivel)
+    {
+        if (nombre == null || nuevoNivel == null) return false;
+        String buscado = normalizeText(nombre);
+        for (int i = 0; i < requisitos.size(); i++) 
+        {
+            Competencia actual = requisitos.get(i);
+            if (actual == null || actual.getNombre() == null) continue;
+            if (normalizeText(actual.getNombre()).equals(buscado)) {
+                Competencia mod = new Competencia(actual.getNombre(), nuevoNivel);
+                if (mod.getNivel() == null) {
+                    System.out.println("Nivel inválido: " + nuevoNivel);
+                    return false;
+                }
+                requisitos.set(i, mod);
+                System.out.println("Requisito editado: " + mod);
+                return true;
+            }
+        }
+        System.out.println("No se encontró requisito: " + nombre);
+        return false;
+    }
     public void mostrarRequisitos() 
     {
         System.out.println("Requisitos del puesto " + nombrePuesto + " (ID: " + idPuesto + "):");
@@ -242,7 +268,7 @@ public class Puesto {
         for (int i = 0; i < requisitos.size(); i++) {
             Competencia c = requisitos.get(i);
             if (c == null) continue;
-            System.out.println(" " + (i + 1) + ". " + c); // imprime c.toString()
+            System.out.println(" " + (i + 1) + ". " + c);
         }
     }
     
@@ -275,5 +301,15 @@ public class Puesto {
         }
         return seleccion;
     } 
+    
+    public String normalizeText(String text)
+    {
+        if (text == null) return "";
+        String aux = text.trim().toUpperCase();
+        aux = Normalizer.normalize(aux, Normalizer.Form.NFD).replaceAll("\\p{M}", "");
+        aux = aux.replaceAll("[^A-Z0-9 ]", "");
+        return aux;
+    }
 }
+
 
