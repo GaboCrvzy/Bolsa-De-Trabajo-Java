@@ -1,0 +1,8 @@
+package proyectopoo;
+
+
+public class PuestoDuplicadoException extends Exception {
+    public PuestoDuplicadoException(String message) {
+        super(message);
+    }
+}
