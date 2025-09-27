@@ -1,6 +1,9 @@
 package proyectopoo;
 
-//REALIZAR EL MAIN MODULARIZADO (ENTRADA POR TECLADO , DATOS POR CONSOLA , VENTANAS
+import java.io.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+
 
 public class ProyectoPOO {
 
@@ -9,4 +12,17 @@ public class ProyectoPOO {
         
     }
     
+    //AQUI VA EL LLENADO DE DATOS ESTATICO ES DECIR EL QUE SE ESCRIBE Y VA
+    public static void llenadoDatos(GestionPuesto sistema)
+    {
+    
+    }
+    
+    //AQUI VA EL LLENADO DE DATOS DESDE CONSOLA USANDO BUFFEREDREADER
+    public static void llenadoDeConsola(GestionPuesto sistema) throws IOException
+    {
+        
+    }
+    
+    //FALTARIA AGREGAR EL LLENADO DE DATOS MEDIANTE VENTANAS 
 }
