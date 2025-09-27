@@ -11,16 +11,22 @@ class GestionPuesto
         this.puestos = new HashMap<>();
     }
 
-    public boolean agregarPuesto(Puesto p) 
+    public boolean agregarPuesto(Puesto p) throws PuestoDuplicadoException 
     {
-        if (p == null) {return false;}
+        if (p == null) {
+            System.out.println("No se puede agregar puesto (nulo).");
+            return false;
+        }
         String rawId = p.getIdPuesto();
         String id = normalizeId(rawId);
-        
-        if (id == null) { System.out.println("No se puede agregar puesto: id puesto nulo o inválido."); return false; }
-        if (puestos.containsKey(id)) { System.out.println("No se puede agregar puesto: idPuesto ya existente -> " + id); return false;}
-        
-        p.setIdPuesto(id); 
+        if (id == null) {
+            System.out.println("No se puede agregar puesto: id puesto nulo o inválido.");
+            return false;
+        }
+        if (puestos.containsKey(id)) {
+            throw new PuestoDuplicadoException("idPuesto ya existente -> " + id);
+        }
+        p.setIdPuesto(id);
         puestos.put(id, p);
         System.out.println("Puesto agregado: id = " + id + " | nombre = " + p.getNombrePuesto());
         return true;
@@ -129,6 +135,24 @@ class GestionPuesto
         p.agregarRequisito(req);
         return true;
     }
+    
+    public boolean editarPuesto(String idPuesto, String nuevoNombre, String nuevaDescripcion) 
+    {
+        String id = normalizeId(idPuesto);
+        if (id == null) {
+            System.out.println("ID inválido para editar puesto.");
+            return false;
+        }
+        Puesto p = puestos.get(id);
+        if (p == null) {
+            System.out.println("Puesto no encontrado: " + id);
+            return false;
+        }
+        if (nuevoNombre != null && !nuevoNombre.trim().isEmpty()) p.setNombrePuesto(nuevoNombre);
+        if (nuevaDescripcion != null && !nuevaDescripcion.trim().isEmpty()) p.setDescripcionPuesto(nuevaDescripcion);
+        System.out.println("Puesto editado: id = " + id);
+        return true;
+    }
 
     public LinkedList<Persona> seleccionarPostulantes(String idPuesto) 
     {
@@ -139,6 +163,51 @@ class GestionPuesto
         
         if (p == null) return vacio;
         return p.seleccionarPostulantes();
+    }
+    
+    //PROPIA 2.5 SIA
+    public List<Persona> seleccionarTopNPorMatching(String idPuesto, int n) {
+        List<Persona> vacio = new ArrayList<>();
+        if (n <= 0) return vacio;
+
+        String id = normalizeId(idPuesto);
+        if (id == null) return vacio;
+
+        Puesto p = puestos.get(id);
+        if (p == null) return vacio;
+
+        LinkedList<Persona> candidatos = p.getPostulantes();
+        Map<Persona, Integer> score = new HashMap<>();
+
+        for (Persona per : candidatos) {
+            if (per == null) continue;
+            int s = 0;
+            for (Competencia req : p.getRequisitos()) {
+                if (req == null || req.getNombre() == null) continue;
+                // si cumple nivel minimo -> +2
+                if (per.tieneHabilidadConNivelMinimo(req.getNombre(), req.getNivel())) {
+                    s += 2;
+                } else if (per.tieneHabilidad(req.getNombre())) {
+                    // tiene la competencia pero nivel inferior -> +1
+                    s += 1;
+                }
+            }
+            score.put(per, s);
+        }
+
+        List<Persona> orden = new ArrayList<>(score.keySet());
+        orden.sort((a, b) -> {
+            int sa = score.getOrDefault(a, 0);
+            int sb = score.getOrDefault(b, 0);
+            if (sa != sb) return Integer.compare(sb, sa);
+            // tie-breaker por nombre normalizado
+            String na = (a.getNombre() == null) ? "" : a.getNombre();
+            String nb = (b.getNombre() == null) ? "" : b.getNombre();
+            return na.compareTo(nb);
+        });
+
+        if (n >= orden.size()) return orden;
+        return orden.subList(0, n);
     }
 
     public Persona buscarPostulanteGlobal(String rut)
