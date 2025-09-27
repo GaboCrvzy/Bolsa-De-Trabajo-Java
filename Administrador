@@ -1,0 +1,72 @@
+package proyectopoo;
+
+import java.text.Normalizer;
+
+public class Administrador extends Persona {
+
+    private String nivelAdmin; // Valores válidos: "SUPER", "ADMIN", "BASICO"
+    private String area;       // Ej: RRHH, SISTEMAS, FINANZAS, ETC
+
+    public Administrador(String rut, String nombre, String ciudad, String nroContacto,String nivelAdmin, String area)
+    {
+        super(rut, nombre, ciudad, nroContacto);
+        this.nivelAdmin = nivelAdmin;
+        this.area= area;
+    }
+
+    public String getNivelAdmin() { return nivelAdmin; }
+    public String getArea() { return area; }
+
+    public void setNivelAdmin(String nivelAdmin)
+    {
+        if (nivelAdmin == null) {
+            System.out.println("Nivel admin inválido (nulo).");
+            return;
+        }
+        String norm = Normalizer.normalize(nivelAdmin.trim().toUpperCase(), Normalizer.Form.NFD).replaceAll("\\p{M}", "");
+        norm = norm.replaceAll("[^A-Z]", ""); // quedarán SOLO letras
+        
+        if ("SUPER".equals(norm) || "ADMIN".equals(norm) || "BASICO".equals(norm)) {
+            this.nivelAdmin = norm;
+        } else {
+            System.out.println("Nivel admin inválido. Valores válidos: SUPER, ADMIN, BASICO.");
+        }
+    }
+
+    public void setArea(String area) 
+    {
+        if (area == null) {
+            System.out.println("Área inválida (nula).");
+            return;
+        }
+        String norm = Normalizer.normalize(area.trim().toUpperCase(), Normalizer.Form.NFD).replaceAll("\\p{M}", "");
+        norm = norm.replaceAll("[^A-Z ]", "");
+        if (norm.isEmpty() || !norm.matches("^[A-Z ]+$")) {
+            System.out.println("Área inválida. Debe contener solo letras y espacios.");
+            return;
+        }
+        this.area = norm;
+    }
+
+    @Override
+    public String toString() {
+        String base = super.toString();
+        String nivel = (nivelAdmin == null) ? "<sin nivel>" : nivelAdmin;
+        String a = (area == null) ? "<sin area>" : area;
+        return "[ADMIN " + nivel + "] " + base + " | Área: " + a;
+    }
+
+    //SOBREESCRITURA 2.7 
+    @Override
+    public void mostrarHabilidades() {
+        System.out.println("=== Administrador: " + (getNombre()==null? "<sin nombre>":getNombre())
+                + " | Nivel: " + (nivelAdmin==null? "<sin nivel>":nivelAdmin)
+                + " | Área: " + (area==null? "<sin area>":area) + " ===");
+        super.mostrarHabilidades();
+    }
+
+    public boolean puedeModificarPuestos() {
+        if (nivelAdmin == null) return false;
+        return "SUPER".equals(nivelAdmin) || "ADMIN".equals(nivelAdmin);
+    }
+}
