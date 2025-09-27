@@ -1,0 +1,72 @@
+package proyectopoo;
+
+import java.text.Normalizer;
+
+public class Empleado extends Persona {
+
+    private String cargo;
+    private double salario;
+    private int expLaboralYears;
+
+    public Empleado(String rut, String nombre, String ciudad, String nroContacto,String cargo, double salario, int expLaboralYears) 
+    {
+        super(rut, nombre, ciudad, nroContacto);
+        this.cargo = cargo;
+        this.salario = salario;
+        this.expLaboralYears= expLaboralYears;
+    }
+
+    public String getCargo() { return cargo; }
+    public double getSalario() { return salario; }
+    public int getExpLaboralYears() { return expLaboralYears;}
+
+    public void setCargo(String cargo) 
+    {
+        if (cargo == null) {
+            System.out.println("CARGO inválido (nulo).");
+            return;
+        }
+        String norm = Normalizer.normalize(cargo.trim().toUpperCase(), Normalizer.Form.NFD).replaceAll("\\p{M}", "");
+        norm = norm.replaceAll("[^A-Z ]", "");
+        if (norm.isEmpty() || !norm.matches("^[A-Z ]+$")) {
+            System.out.println("CARGO inválido. Debe contener solo letras y espacios.");
+            return;
+        }
+        this.cargo = norm;
+    }
+
+    public void setSalario(double salario)
+    {
+        if (salario < 0.0) {
+            System.out.println("SALARIO inválido. Debe ser >= 0. Se mantiene valor anterior.");
+            return;
+        }
+        this.salario = salario;
+    }
+
+    public void setexpLaboralYears(int expLaboralYears) 
+    {
+        if (expLaboralYears < 0) {
+            System.out.println("AÑOS DE EXPERIENCIA inválido. Debe ser >= 0. Se mantiene valor anterior.");
+            return;
+        }
+        this.expLaboralYears = expLaboralYears;
+    }
+
+    @Override
+    public String toString() 
+    {
+        String base = super.toString();
+        String c = (cargo == null) ? "<sin cargo>" : cargo;
+        return base + " | Cargo: " + c + " | Salario: " + salario + " | Años exp: " + expLaboralYears;
+    }
+
+    //SOBREESCRITURA DE METODO DE PERSONA
+    @Override
+    public void mostrarHabilidades() {
+        System.out.println("=== Empleado: " + (getNombre() == null ? "<sin nombre>" : getNombre())
+            + " | Cargo: " + (cargo == null ? "<sin cargo>" : cargo)
+            + " | Años exp: " + expLaboralYears + " ===");
+        super.mostrarHabilidades();
+    }
+}
