@@ -1,28 +1,476 @@
 package proyectopoo;
 
 import java.io.*;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
-
+/**
+ * Clase principal - ProyectoPOO
+ */
 public class ProyectoPOO {
 
     public static void main(String[] args) {
         GestionPuesto sistema = new GestionPuesto();
-        
+
+        // CARGA DE DATOS INICIALES (SIA1.4)
+        llenadoDatos(sistema);
+
+        // Mostrar resumen rápido de lo que se cargó
+        sistema.imprimirResumen();
+
+        // Lanzar menú por consola (SIA1.8 y SIA2.4)
+        try {
+            llenadoDeConsola(sistema);
+        } catch (IOException e) {
+            System.out.println("Error en entrada por consola: " + e.getMessage());
+        }
+
+        // Al salir, opcional: guardar datos en carpeta "data"
+        sistema.guardarEnDir("data");
+        System.out.println("Programa finalizado.");
     }
-    
-    //AQUI VA EL LLENADO DE DATOS ESTATICO ES DECIR EL QUE SE ESCRIBE Y VA
-    public static void llenadoDatos(GestionPuesto sistema)
+
+    // AQUI VA EL LLENADO DE DATOS ESTATICO (DATOS INICIALES)
+    public static void llenadoDatos(GestionPuesto sistema) {
+        if (sistema == null) return;
+
+        // -------- PUESTOS --------
+        Puesto p1 = new Puesto("1001", "PROGRAMADOR BACKEND", "Desarrollo y mantenimiento de APIs Java");
+        Puesto p2 = new Puesto("1002", "ANALISTA BASES DATOS", "Modelamiento y consultas SQL");
+        Puesto p3 = new Puesto("1003", "DESARROLLADOR FRONTEND", "Maquetado y lógica cliente (HTML/CSS/JS)");
+
+        // Requisitos (Competencia: nombre, nivel)
+        Competencia req1a = new Competencia("Java", "INTERMEDIO");
+        Competencia req1b = new Competencia("SQL", "INTERMEDIO");
+
+        Competencia req2a = new Competencia("SQL", "AVANZADO");
+        Competencia req2b = new Competencia("Modelamiento", "INTERMEDIO");
+
+        Competencia req3a = new Competencia("HTML", "BASICO");
+        Competencia req3b = new Competencia("CSS", "INTERMEDIO");
+        Competencia req3c = new Competencia("JavaScript", "INTERMEDIO");
+
+        // Agregar requisitos a puestos
+        p1.agregarRequisito(req1a);
+        p1.agregarRequisito(req1b);
+
+        p2.agregarRequisito(req2a);
+        p2.agregarRequisito(req2b);
+
+        p3.agregarRequisito(req3a);
+        p3.agregarRequisito(req3b);
+        p3.agregarRequisito(req3c);
+
+        // -------- PERSONAS / POSTULANTES --------
+        Persona post1 = new Persona("217104491", "Gabriel Fuentes", "Valparaiso", "949033564");
+        post1.agregarHabilidad("Java", "AVANZADO");
+        post1.agregarHabilidad("SQL", "INTERMEDIO");
+
+        Persona post2 = new Persona("214486320", "Alexis Escobar", "Santiago", "976321235");
+        post2.agregarHabilidad("Java", "BASICO");
+        post2.agregarHabilidad("SQL", "INTERMEDIO");
+
+        Empleado emp1 = new Empleado("201234567", "María Pérez", "Concepcion", "912345678",
+                "PROGRAMADORA", 950000.0, 4);
+        emp1.agregarHabilidad("Java", "INTERMEDIO");
+        emp1.agregarHabilidad("JavaScript", "INTERMEDIO");
+
+        Administrador admin1 = new Administrador("198765432", "Carlos Admin", "Santiago", "900000001",
+                "SUPER", "SISTEMAS");
+        admin1.agregarHabilidad("Modelamiento", "INTERMEDIO");
+
+        // REGISTRAR PUESTOS EN EL SISTEMA (GestionPuesto)
+        try {
+            sistema.agregarPuesto(p1);
+            sistema.agregarPuesto(p2);
+            sistema.agregarPuesto(p3);
+        } catch (PuestoDuplicadoException ex) {
+            System.out.println("Error agregando puesto inicial: " + ex.getMessage());
+        }
+
+        // INSCRIBIR POSTULANTES EN PUESTOS
+        sistema.agregarPostulanteAPuesto("1001", post1);
+        sistema.agregarPostulanteAPuesto("1001", post2);
+        sistema.agregarPostulanteAPuesto("1001", emp1);
+
+        sistema.agregarPostulanteAPuesto("1002", post2);
+        sistema.agregarPostulanteAPuesto("1002", admin1);
+
+        sistema.agregarPostulanteAPuesto("1003", emp1);
+        sistema.agregarPostulanteAPuesto("1003", post1);
+
+        Puesto p4 = new Puesto("1004", "QA", "Pruebas automatizadas y manuales");
+        try { sistema.agregarPuesto(p4); } catch (PuestoDuplicadoException e) { /* ignore */ }
+        Persona post3 = new Persona("209876543", "Luisa Gómez", "La Serena", "915555555");
+        post3.agregarHabilidad("HTML", "AVANZADO");
+        post3.agregarHabilidad("CSS", "INTERMEDIO");
+        sistema.agregarPostulanteAPuesto("1003", post3);
+
+        System.out.println("Carga de datos inicial completada.");
+    }
+
+    // AQUI VA EL LLENADO DE DATOS DESDE CONSOLA USANDO BUFFEREDREADER
+    public static void llenadoDeConsola(GestionPuesto sistema) throws IOException 
     {
-    
+        if (sistema == null) return;
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        boolean running = true;
+
+        while (running) 
+        {
+            System.out.println("\n==== MENÚ PRINCIPAL (Gestión de Puestos y Postulantes) ====");
+            System.out.println("1. Agregar nuevo puesto (Inserción manual de puesto)");
+            System.out.println("2. Agregar postulante a un puesto (Inserción manual)");
+            System.out.println("3. Mostrar listado de postulantes de un puesto");
+            System.out.println("4. Editar postulante (datos y habilidades)");
+            System.out.println("5. Eliminar postulante de un puesto");
+            System.out.println("6. Mostrar postulantes seleccionados que cumplen requisitos (auto-selección)");
+            System.out.println("7. Listar todos los puestos (IDs)");
+            System.out.println("8. Volver / Salir del menú");
+            System.out.print("Elija opción (1-8): ");
+
+            String line = br.readLine();
+            if (line == null) break;
+            int opt;
+            try { opt = Integer.parseInt(line.trim()); } catch (NumberFormatException e) { System.out.println("Ingrese un número válido."); continue; }
+
+            switch (opt) 
+            {
+                case 1: // Agregar nuevo puesto
+                    System.out.println("--- Crear nuevo puesto ---");
+                    String newId = pedirIdPuesto(br, sistema);
+                    if (newId == null) break; // usuario canceló o id inválido
+
+                    // Título (validar que no sea vacío y solo letras/espacios)
+                    String titulo;
+                    while (true) {
+                        System.out.print("Título del puesto: ");
+                        titulo = br.readLine();
+                        if (titulo == null) break;
+                        String norm = normalizar(titulo);
+                        if (norm.isEmpty() || !norm.matches("^[A-Z ]+$")) {
+                            System.out.println("Título inválido. Use sólo letras y espacios.");
+                        } else {
+                            titulo = norm;
+                            break;
+                        }
+                    }
+                    if (titulo == null) break;
+
+                    // Descripción (texto libre no vacío, se trunca si muy largo)
+                    String descripcion = pedirTextoDescripcion(br);
+
+                    // Cantidad de requisitos
+                    int nReq = pedirEntero(br, "¿Cuántos requisitos tendrá este puesto? (0 = ninguno): ");
+                    // Crear puesto y agregar requisitos
+                    Puesto nuevoPuesto = new Puesto(newId, titulo, descripcion);
+                    for (int i = 0; i < nReq; i++) {
+                        System.out.print("Nombre competencia " + (i + 1) + ": ");
+                        String nomReq = br.readLine();
+                        if (nomReq == null) nomReq = "";
+                        String nivelReq = pedirNivelValido(br, nomReq);
+                        Competencia c = new Competencia(normalizar(nomReq), normalizar(nivelReq));
+                        nuevoPuesto.agregarRequisito(c);
+                    }
+
+                    try {
+                        boolean ok = sistema.agregarPuesto(nuevoPuesto);
+                        if (ok) System.out.println("Puesto creado y agregado correctamente (ID: " + newId + ").");
+                    } catch (PuestoDuplicadoException ex) {
+                        System.out.println("No se pudo agregar puesto: " + ex.getMessage());
+                    }
+                    break;
+
+                case 2: // Agregar postulante (mantenido)
+                    System.out.print("ID del puesto donde agregar postulante: ");
+                    String id = br.readLine();
+                    if (id == null) break;
+                    if (!sistema.existePuesto(id)) {
+                        System.out.println("Puesto no encontrado con id: " + id);
+                        break;
+                    }
+                    // pedir datos postulante
+                    String rut = pedirRut(br);
+                    if (rut == null) break;
+                    String nombre = pedirNombre(br);
+                    if (nombre == null) break;
+                    String ciudad = pedirCiudad(br);
+                    if (ciudad == null) break;
+                    String contacto = pedirContacto(br);
+                    if (contacto == null) break;
+
+                    Persona nuevo = new Persona(rut, nombre, ciudad, contacto);
+
+                    // competencias
+                    int nComp = pedirEntero(br, "¿Cuántas competencias desea agregar al postulante? (0 = ninguna): ");
+                    for (int i = 0; i < nComp; i++) {
+                        System.out.print("Nombre competencia " + (i + 1) + ": ");
+                        String nomComp = br.readLine();
+                        if (nomComp == null) nomComp = "";
+                        String nivel = pedirNivelValido(br, nomComp);
+                        String nivelNorm = normalizar(nivel);
+                        Competencia c = new Competencia(normalizar(nomComp), nivelNorm);
+                        nuevo.agregarHabilidad(c);
+                    }
+
+                    boolean added = sistema.agregarPostulanteAPuesto(id, nuevo);
+                    if (added) System.out.println("Postulante agregado correctamente.");
+                    break;
+
+                case 3: // Mostrar listado de postulantes de un puesto
+                    System.out.print("ID del puesto a mostrar: ");
+                    String idShow = br.readLine();
+                    if (idShow == null) break;
+                    Puesto p = sistema.obtenerPuesto(idShow);
+                    if (p == null) break;
+                    p.mostrarPuesto();
+                    System.out.println("Listado detallado de postulantes:");
+                    for (Persona per : p.getPostulantes()) {
+                        per.mostrarHabilidades();
+                    }
+                    break;
+
+                case 4: // Editar postulante
+                    System.out.print("ID del puesto del postulante a editar: ");
+                    String idE = br.readLine();
+                    if (idE == null) break;
+                    Puesto pEdit = sistema.obtenerPuesto(idE);
+                    if (pEdit == null) break;
+                    System.out.print("Ingrese RUT del postulante a editar: ");
+                    String rutE = br.readLine();
+                    if (rutE == null) break;
+                    Persona target = pEdit.buscarPostulante(rutE);
+                    if (target == null) { System.out.println("Postulante no encontrado en el puesto."); break; }
+
+                    boolean editing = true;
+                    while (editing) {
+                        System.out.println("\n--- Submenú editar postulante [" + target.getRut() + " - " + target.getNombre() + "] ---");
+                        System.out.println("1. Modificar nombre");
+                        System.out.println("2. Modificar ciudad");
+                        System.out.println("3. Modificar contacto");
+                        System.out.println("4. Agregar competencia");
+                        System.out.println("5. Eliminar competencia");
+                        System.out.println("6. Modificar nivel de competencia existente (reemplazar)");
+                        System.out.println("7. Mostrar competencias actuales");
+                        System.out.println("8. Volver al menú anterior");
+                        System.out.print("Elija opción (1-8): ");
+                        String sopt = br.readLine();
+                        if (sopt == null) break;
+                        int sChoice;
+                        try { sChoice = Integer.parseInt(sopt.trim()); } catch (NumberFormatException e) { System.out.println("Ingrese número válido."); continue; }
+
+                        switch (sChoice) {
+                            case 1:
+                                System.out.print("Nuevo nombre: ");
+                                String nuevoNombre = br.readLine();
+                                if (nuevoNombre != null) target.setNombre(nuevoNombre);
+                                break;
+                            case 2:
+                                System.out.print("Nueva ciudad: ");
+                                String nuevaCiudad = br.readLine();
+                                if (nuevaCiudad != null) target.setCiudad(nuevaCiudad);
+                                break;
+                            case 3:
+                                System.out.print("Nuevo contacto (solo números): ");
+                                String newContacto = br.readLine();
+                                if (newContacto != null) target.setNroContacto(newContacto);
+                                break;
+                            case 4:
+                                System.out.print("Nombre competencia a agregar: ");
+                                String nomAdd = br.readLine();
+                                if (nomAdd == null) break;
+                                String nivelAdd = pedirNivelValido(br, nomAdd);
+                                target.agregarHabilidad(nomAdd, normalizar(nivelAdd));
+                                break;
+                            case 5:
+                                System.out.print("Nombre competencia a eliminar: ");
+                                String nomDel = br.readLine();
+                                if (nomDel == null) break;
+                                target.eliminarHabilidad(nomDel);
+                                break;
+                                case 6:
+                                    System.out.print("Nombre competencia a modificar nivel: ");
+                                    String nomMod = br.readLine();
+                                    if (nomMod == null) break;
+                                    System.out.print("Nuevo nivel (BASICO, INTERMEDIO, AVANZADO): ");
+                                    String nivelMod = br.readLine();
+                                    if (nivelMod == null) break;
+                                    if (!isNivelValido(nivelMod)) { System.out.println("Nivel inválido."); break; }
+                                    target.eliminarHabilidad(nomMod);
+                                    target.agregarHabilidad(nomMod, normalizar(nivelMod));
+                                    break;
+                                case 7:
+                                    target.mostrarHabilidades();
+                                    break;
+                                case 8:
+                                    editing = false;
+                                    break;
+                                default:
+                                    System.out.println("Opción inválida.");
+                            }
+                        }
+                        break;
+
+                case 5: // Eliminar postulante
+                    System.out.print("ID del puesto: ");
+                    String idDel = br.readLine();
+                    if (idDel == null) break;
+                    System.out.print("RUT del postulante a eliminar: ");
+                    String rutDel = br.readLine();
+                    if (rutDel == null) break;
+                    boolean delRes = sistema.eliminarPostulanteDePuesto(idDel, rutDel);
+                    if (delRes) System.out.println("Postulante eliminado.");
+                    else System.out.println("No se pudo eliminar (verifique ID y RUT).");
+                    break;
+
+                case 6: // Mostrar postulantes que cumplen requisitos (selección automática)
+                    System.out.print("ID del puesto a evaluar: ");
+                    String idSel = br.readLine();
+                    if (idSel == null) break;
+                    Puesto pSel = sistema.obtenerPuesto(idSel);
+                    if (pSel == null) break;
+                    List<Persona> seleccion = pSel.seleccionarPostulantes();
+                    if (seleccion.isEmpty()) {
+                        System.out.println("Ningún postulante cumple todos los requisitos del puesto.");
+                    } else {
+                        System.out.println("Postulantes seleccionados:");
+                        for (Persona per : seleccion) {
+                            System.out.println(" - " + per);
+                        }
+                    }
+                    break;
+
+                case 7: // Listar todos los puestos (IDs)
+                    List<String> ids = sistema.listarIds();
+                    if (ids.isEmpty()) System.out.println("No hay puestos registrados.");
+                    else { System.out.println("Puestos registrados (IDs): " + ids); }
+                    break;
+
+                case 8:
+                    running = false;
+                    break;
+                
+                default:
+                    System.out.println("Opción inválida.");
+            }
+        }
     }
     
-    //AQUI VA EL LLENADO DE DATOS DESDE CONSOLA USANDO BUFFEREDREADER
-    public static void llenadoDeConsola(GestionPuesto sistema) throws IOException
-    {
-        
+    private static String normalizar(String s) {
+        if (s == null) return null;
+        String aux = s.trim().toUpperCase();
+        aux = Normalizer.normalize(aux, Normalizer.Form.NFD).replaceAll("\\p{M}", "");
+        aux = aux.replaceAll("[^A-Z0-9 ]", "");
+        return aux;
+    }
+
+    private static boolean isNivelValido(String nivel) {
+        if (nivel == null) return false;
+        String aux = normalizar(nivel);
+        return "BASICO".equals(aux) || "INTERMEDIO".equals(aux) || "AVANZADO".equals(aux);
+    }
+
+    private static String pedirNivelValido(BufferedReader br, String nomComp) throws IOException {
+        String nivelTxt = null;
+        while (true) {
+            System.out.print("Nivel (BASICO, INTERMEDIO, AVANZADO) para '" + (nomComp==null?"":nomComp) + "': ");
+            nivelTxt = br.readLine();
+            if (nivelTxt == null) return null;
+            if (isNivelValido(nivelTxt)) return normalizar(nivelTxt);
+            System.out.println("Nivel inválido. Intente de nuevo.");
+        }
+    }
+
+    private static String pedirRut(BufferedReader br) throws IOException {
+        while (true) {
+            System.out.print("RUT (solo números, 7-9 dígitos): ");
+            String rut = br.readLine();
+            if (rut == null) return null;
+            String solo = rut.trim().replaceAll("[^0-9]", "");
+            if (solo.matches("\\d{7,9}")) return solo;
+            System.out.println("RUT inválido. Intente nuevamente.");
+        }
+    }
+
+    private static String pedirNombre(BufferedReader br) throws IOException {
+        while (true) {
+            System.out.print("Nombre completo: ");
+            String nombre = br.readLine();
+            if (nombre == null) return null;
+            String aux = normalizar(nombre);
+            if (aux.matches("^[A-Z ]+$")) return aux;
+            System.out.println("Nombre inválido. Debe contener solo letras y espacios.");
+        }
+    }
+
+    private static String pedirCiudad(BufferedReader br) throws IOException {
+        while (true) {
+            System.out.print("Ciudad: ");
+            String ciudad = br.readLine();
+            if (ciudad == null) return null;
+            String aux = normalizar(ciudad);
+            if (aux.matches("^[A-Z ]+$")) return aux;
+            System.out.println("Ciudad inválida. Debe contener solo letras y espacios.");
+        }
+    }
+
+    private static String pedirContacto(BufferedReader br) throws IOException {
+        while (true) {
+            System.out.print("Contacto (8-9 dígitos): ");
+            String contacto = br.readLine();
+            if (contacto == null) return null;
+            String solo = contacto.trim().replaceAll("[^0-9]", "");
+            if (solo.matches("\\d{8,9}")) return solo;
+            System.out.println("Contacto inválido. Intente nuevamente.");
+        }
+    }
+
+    private static int pedirEntero(BufferedReader br, String prompt) throws IOException {
+        while (true) {
+            System.out.print(prompt);
+            String line = br.readLine();
+            if (line == null) return 0;
+            try {
+                int v = Integer.parseInt(line.trim());
+                if (v >= 0) return v;
+            } catch (NumberFormatException ex) { /* continue */ }
+            System.out.println("Ingrese un número entero >= 0.");
+        }
     }
     
-    //FALTARIA AGREGAR EL LLENADO DE DATOS MEDIANTE VENTANAS 
+    // Pide un ID de puesto que sea numérico y no exista en el sistema (si existe, pregunta otra vez)
+    private static String pedirIdPuesto(BufferedReader br, GestionPuesto sistema) throws IOException {
+        while (true) {
+            System.out.print("ID del puesto (solo números): ");
+            String id = br.readLine();
+            if (id == null) return null;
+            String solo = id.trim().replaceAll("[^0-9]", "");
+            if (!solo.matches("\\d+")) { System.out.println("ID inválido. Debe contener sólo dígitos."); continue; }
+            if (sistema.existePuesto(solo)) {
+                System.out.println("El ID ya existe. Ingrese otro ID distinto.");
+                continue;
+            }
+            return solo;
+        }
+    }
+
+    // Pide descripción (texto no vacío, se trunca si muy largo)
+    private static String pedirTextoDescripcion(BufferedReader br) throws IOException {
+        System.out.print("Descripción del puesto: ");
+        String desc = br.readLine();
+        if (desc == null) return "";
+        desc = desc.trim();
+        if (desc.length() == 0) return "<sin descripcion>";
+        final int MAX = 500;
+        if (desc.length() > MAX) {
+            System.out.println("Descripción muy larga; se truncará a " + MAX + " caracteres.");
+            desc = desc.substring(0, MAX).trim();
+        }
+        return desc;
+    }
+    
+    
+    //FALTARIA AGREGAR EL LLENADO DE DATOS MEDIANTE VENTANAS NECESITO QUE ME GUIES
 }
